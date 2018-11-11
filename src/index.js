@@ -1,4 +1,6 @@
 const L = require('leaflet');
+require('./stats.polyline');
+require('./stats.trackdrawer');
 require('./stats');
 const cache = require('./cache');
 const Geoportail = require('./geoportail');

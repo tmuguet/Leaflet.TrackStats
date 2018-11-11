@@ -1,198 +1,130 @@
 const L = require('leaflet');
-const cache = require('./cache');
 
-if (typeof Math.degrees === 'undefined') {
-  // Converts from radians to degrees.
-  Math.degrees = function degrees(radians) {
-    return (radians * 180) / Math.PI;
-  };
-}
+const stats = L.Class.extend({
+  options: {},
 
-function getLatLngsFlatten(polyline) {
-  const latlngs = polyline.getLatLngs();
+  initialize(latlngs, options) {
+    L.Util.setOptions(this, options);
 
-  if (latlngs.length > 0 && Array.isArray(latlngs[0])) {
-    let result = [];
-    for (let j = 0; j < latlngs.length; j += 1) {
-      result = result.concat(latlngs[j]);
+    this.startingDistance = 0;
+    this.distance = 0;
+    this.altMin = Number.MAX_VALUE;
+    this.altMax = Number.MIN_VALUE;
+    this.heightDiffUp = 0;
+    this.heightDiffDown = 0;
+    this.slopeMin = Number.MAX_VALUE;
+    this.slopeMax = Number.MIN_VALUE;
+    this.slopeTerrainMin = Number.MAX_VALUE;
+    this.slopeTerrainMax = Number.MIN_VALUE;
+    this.latlngs = [];
+
+    if (latlngs.length === 0) {
+      return;
     }
 
-    return result;
-  }
-  return latlngs;
-}
+    const elevations = JSON.parse(JSON.stringify(latlngs)); // deep copy
 
-function computePathStats(polyline) {
-  const latlngs = getLatLngsFlatten(polyline);
+    this.altMin = elevations[0].z;
+    this.altMax = elevations[0].z;
+    this.slopeTerrainMin = elevations[0].slope;
+    this.slopeTerrainMax = elevations[0].slope;
 
-  const elevations = latlngs.map(coords => coords.getCachedInfos());
+    elevations[0].dist = 0;
+    elevations[0].slopeOnTrack = 0;
 
-  if (elevations.length === 0) {
-    return null;
-  }
+    this.latlngs.push(elevations[0]);
 
-  const results = {
-    distance: 0,
-    altMin: elevations[0].z,
-    altMax: elevations[0].z,
-    heightDiffUp: 0,
-    heightDiffDown: 0,
-    slopeMin: Number.MAX_VALUE,
-    slopeMax: Number.MIN_VALUE,
-    slopeTerrainMin: elevations[0].slope,
-    slopeTerrainMax: elevations[0].slope,
-    elevations: [],
-  };
+    let j = 0;
+    for (let i = 1; i < elevations.length; i += 1) {
+      const localDistance = L.latLng(elevations[i]).distanceTo(L.latLng(this.latlngs[j])); // m
+      if (localDistance > 0) {
+        this.distance += localDistance / 1000; // km
 
-  elevations[0].dist = 0;
-  elevations[0].slopeOnTrack = 0;
+        j += 1;
+        this.latlngs[j] = elevations[i];
+        const current = this.latlngs[j];
 
-  results.elevations.push(elevations[0]);
+        current.dist = this.distance;
+        current.slopeOnTrack = Math.degrees(
+          Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance),
+        );
 
-  let j = 0;
-  for (let i = 1; i < elevations.length; i += 1) {
-    const localDistance = L.latLng(elevations[i]).distanceTo(L.latLng(results.elevations[j])); // m
-    if (localDistance > 0) {
-      results.distance += localDistance / 1000; // km
+        if (current.z < this.altMin) this.altMin = current.z;
+        if (current.z > this.altMax) this.altMax = current.z;
 
-      j += 1;
-      results.elevations[j] = elevations[i];
-      results.elevations[j].dist = results.distance;
-      results.elevations[j].slopeOnTrack = Math.degrees(
-        Math.atan((Math.round(results.elevations[j].z) - Math.round(results.elevations[j - 1].z)) / localDistance),
-      );
+        if (current.slopeOnTrack < this.slopeMin) this.slopeMin = current.slopeOnTrack;
+        if (current.slopeOnTrack > this.slopeMax) this.slopeMax = current.slopeOnTrack;
 
-      if (results.elevations[j].z < results.altMin) results.altMin = results.elevations[j].z;
-      if (results.elevations[j].z > results.altMax) results.altMax = results.elevations[j].z;
+        if (current.z < this.latlngs[j - 1].z) {
+          this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
+        } else {
+          this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
+        }
 
-      if (results.elevations[j].slopeOnTrack < results.slopeMin) results.slopeMin = results.elevations[j].slopeOnTrack;
-      if (results.elevations[j].slopeOnTrack > results.slopeMax) results.slopeMax = results.elevations[j].slopeOnTrack;
-
-      if (results.elevations[j].z < results.elevations[j - 1].z) {
-        results.heightDiffDown += Math.round(results.elevations[j - 1].z - results.elevations[j].z);
-      } else {
-        results.heightDiffUp += Math.round(results.elevations[j].z - results.elevations[j - 1].z);
+        if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
+        if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
       }
-
-      if (results.elevations[j].slope < results.slopeTerrainMin) results.slopeTerrainMin = results.elevations[j].slope;
-      if (results.elevations[j].slope > results.slopeTerrainMax) results.slopeTerrainMax = results.elevations[j].slope;
     }
-  }
 
-  if (results.altMin === undefined) {
-    results.heightDiffUp = undefined;
-    results.heightDiffDown = undefined;
-    results.slopeMax = undefined;
-    results.slopeMin = undefined;
-  }
+    if (this.altMin === undefined) {
+      this.heightDiffUp = undefined;
+      this.heightDiffDown = undefined;
+      this.slopeMax = undefined;
+      this.slopeMin = undefined;
+    }
+  },
 
-  return results;
-}
+  accumulate(accumulator) {
+    accumulator.latlngs = accumulator.latlngs.concat(
+      this.getLatLngs().map((x) => {
+        x.dist += accumulator.distance;
+        return x;
+      }),
+    );
 
-L.Polyline.include({
-  _elevations: [],
-  _distance: 0,
-  _altMin: 0,
-  _altMax: 0,
-  _slopeMin: 0,
-  _slopeMax: 0,
-  _heightDiffUp: 0,
-  _heightDiffDown: 0,
-  _slopeTerrainMin: 0,
-  _slopeTerrainMax: 0,
+    accumulator.distance += this.distance;
+    accumulator.altMin = Math.min(this.altMin, accumulator.altMin);
+    accumulator.altMax = Math.max(this.altMax, accumulator.altMax);
+    accumulator.heightDiffUp += this.heightDiffUp;
+    accumulator.heightDiffDown += this.heightDiffDown;
+    accumulator.slopeMin = Math.min(this.slopeMin, accumulator.slopeMin);
+    accumulator.slopeMax = Math.max(this.slopeMax, accumulator.slopeMax);
+    accumulator.slopeTerrainMin = Math.min(this.slopeTerrainMin, accumulator.slopeTerrainMin);
+    accumulator.slopeTerrainMax = Math.max(this.slopeTerrainMax, accumulator.slopeTerrainMax);
 
-  getElevations() {
-    return JSON.parse(JSON.stringify(this._elevations)); // deep copy
+    return this;
+  },
+
+  getLatLngs() {
+    return JSON.parse(JSON.stringify(this.latlngs)); // deep copy
   },
   getDistance() {
-    return this._distance;
+    return this.distance;
   },
   getAltMin() {
-    return this._altMin;
+    return this.altMin;
   },
   getAltMax() {
-    return this._altMax;
+    return this.altMax;
   },
   getSlopeMin() {
-    return this._slopeMin;
+    return this.slopeMin;
   },
   getSlopeMax() {
-    return this._slopeMax;
+    return this.slopeMax;
   },
   getHeightDiffUp() {
-    return this._heightDiffUp;
+    return this.heightDiffUp;
   },
   getHeightDiffDown() {
-    return this._heightDiffDown;
+    return this.heightDiffDown;
   },
   getSlopeTerrainMin() {
-    return this._slopeTerrainMin;
+    return this.slopeTerrainMin;
   },
   getSlopeTerrainMax() {
-    return this._slopeTerrainMax;
-  },
-
-  fetchAltitude(fetcher) {
-    const latlngs = Array.from(new Set(getLatLngsFlatten(this).filter(coords => !cache.hasZ(coords))));
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (latlngs.length > 0) {
-          const elevations = await fetcher.fetchAltitudes(latlngs);
-          elevations.forEach(x => cache.addZ(x));
-        }
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  },
-
-  fetchSlope(fetcher) {
-    const latlngs = Array.from(new Set(getLatLngsFlatten(this).filter(coords => !cache.hasSlope(coords))));
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (latlngs.length > 0) {
-          const slopes = await fetcher.fetchSlopes(latlngs);
-          slopes.forEach(x => cache.addSlope(x));
-        }
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  },
-
-  fetchInfos(fetcher) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.fetchAltitude(fetcher);
-        await this.fetchSlope(fetcher);
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  },
-
-  computeStats() {
-    const results = computePathStats(this);
-    if (results === null) {
-      return false;
-    }
-    this._elevations = results.elevations;
-    this._distance = results.distance;
-    this._altMin = results.altMin;
-    this._altMax = results.altMax;
-    this._slopeMin = results.slopeMin;
-    this._slopeMax = results.slopeMax;
-    this._heightDiffUp = results.heightDiffUp;
-    this._heightDiffDown = results.heightDiffDown;
-    this._slopeTerrainMin = results.slopeTerrainMin;
-    this._slopeTerrainMax = results.slopeTerrainMax;
-    return true;
+    return this.slopeTerrainMax;
   },
 });
 
-L.LatLng.prototype.getCachedInfos = function getCachedInfos() {
-  return cache.getAll(this);
-};
+module.exports = stats;
