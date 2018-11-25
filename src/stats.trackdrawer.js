@@ -5,6 +5,7 @@ if (L.TrackDrawer !== undefined) {
   L.TrackDrawer.Track.include({
     _steps: undefined,
     _total: undefined,
+    _i: 0,
 
     _bindEvent() {
       this.on('TrackDrawer:done', (e) => {
@@ -14,6 +15,7 @@ if (L.TrackDrawer !== undefined) {
 
     _finalizeRoute(fetcher) {
       const routes = [];
+      this._i += 1;
 
       let currentNode = this._getNode(this._firstNodeId);
 
@@ -38,9 +40,14 @@ if (L.TrackDrawer !== undefined) {
           });
 
           await Promise.all(promises);
-          this._computeStats();
+          this._i -= 1;
+          if (this._i === 0) {
+            // Don't compute stats if this._i changed because the track is out-of-date
+            this._computeStats();
+          }
           resolve();
         } catch (ex) {
+          this._i -= 1;
           reject(ex);
         }
       });
