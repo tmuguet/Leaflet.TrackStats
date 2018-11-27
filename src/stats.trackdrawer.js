@@ -36,7 +36,7 @@ if (L.TrackDrawer !== undefined) {
         try {
           const promises = [];
           routes.forEach((r) => {
-            promises.push(r.fetchInfos(fetcher).then(() => r.computeStats()));
+            promises.push(r.fetchInfos(fetcher, this).then(() => r.computeStats()));
           });
 
           await Promise.all(promises);

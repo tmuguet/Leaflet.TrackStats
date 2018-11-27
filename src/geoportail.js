@@ -19,7 +19,7 @@ module.exports = L.Class.extend({
     L.Util.setOptions(this, options);
   },
 
-  fetchAltitudes(latlngs) {
+  fetchAltitudes(latlngs, eventTarget) {
     const geometry = [];
     const promises = [];
 
@@ -30,13 +30,13 @@ module.exports = L.Class.extend({
       });
       if (geometry.length === 50) {
         // Launch batch
-        promises.push(this._fetchBatchAltitude(geometry.splice(0)));
+        promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
       }
     });
 
     if (geometry.length > 0) {
       // Launch last batch
-      promises.push(this._fetchBatchAltitude(geometry.splice(0)));
+      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
     }
 
     return new Promise(async (resolve, reject) => {
@@ -51,7 +51,7 @@ module.exports = L.Class.extend({
     });
   },
 
-  _fetchBatchAltitude(geometry) {
+  _fetchBatchAltitude(geometry, eventTarget) {
     return new Promise((resolve, reject) => {
       Gp.Services.getAltitude({
         apiKey: this._apiKey,
@@ -62,6 +62,14 @@ module.exports = L.Class.extend({
           result.elevations.forEach((val) => {
             elevations.push({ lat: val.lat, lng: val.lon, z: val.z });
           });
+
+          if (eventTarget) {
+            eventTarget.fire('TrackStats:fetched', {
+              datatype: 'altitudes',
+              size: elevations.length,
+            });
+          }
+
           resolve(elevations);
         },
         onFailure: (error) => {
@@ -71,7 +79,7 @@ module.exports = L.Class.extend({
     });
   },
 
-  fetchSlopes(latlngs) {
+  fetchSlopes(latlngs, eventTarget) {
     const tiles = {};
     const promises = [];
     const crs = this._map ? this._map.options.crs : this.options.crs || L.CRS.EPSG3857;
@@ -98,7 +106,7 @@ module.exports = L.Class.extend({
     Object.keys(tiles).forEach((x) => {
       Object.keys(tiles[x]).forEach((y) => {
         tiles[x][y].forEach((batch) => {
-          promises.push(this._fetchBatchSlope(x, y, batch));
+          promises.push(this._fetchBatchSlope(x, y, batch, eventTarget));
         });
       });
     });
@@ -115,7 +123,7 @@ module.exports = L.Class.extend({
     });
   },
 
-  _fetchBatchSlope(tilex, tiley, coords) {
+  _fetchBatchSlope(tilex, tiley, coords, eventTarget) {
     const tilematrix = 16;
     const tilerow = tiley;
     const tilecol = tilex;
@@ -154,6 +162,14 @@ module.exports = L.Class.extend({
                 data.results.forEach((val) => {
                   slopes.push({ lat: val.lat, lng: val.lon, slope: val.slope });
                 });
+
+                if (eventTarget) {
+                  eventTarget.fire('TrackStats:fetched', {
+                    datatype: 'slopes',
+                    size: slopes.length,
+                  });
+                }
+
                 resolve(slopes);
               } else {
                 reject(new Error("Impossible d'obtenir les données de pentes: résultats invalides"));

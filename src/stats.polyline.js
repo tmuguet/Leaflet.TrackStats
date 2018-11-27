@@ -30,13 +30,28 @@ L.Polyline.include({
     return this._stats;
   },
 
-  fetchAltitude(fetcher) {
+  fetchAltitude(fetcher, eventTarget) {
     const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasZ(coords));
+
+    if (eventTarget && latlngs.length > 0) {
+      eventTarget.fire('TrackStats:fetching', {
+        datatype: 'altitudes',
+        size: latlngs.length,
+      });
+    }
+
     return new Promise(async (resolve, reject) => {
       try {
         if (latlngs.length > 0) {
-          const elevations = await fetcher.fetchAltitudes(latlngs);
+          const elevations = await fetcher.fetchAltitudes(latlngs, eventTarget);
           elevations.forEach(x => cache.addZ(x));
+
+          if (eventTarget) {
+            eventTarget.fire('TrackStats:done', {
+              datatype: 'altitudes',
+              size: elevations.length,
+            });
+          }
         }
         resolve();
       } catch (e) {
@@ -45,13 +60,28 @@ L.Polyline.include({
     });
   },
 
-  fetchSlope(fetcher) {
+  fetchSlope(fetcher, eventTarget) {
     const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasSlope(coords));
+
+    if (eventTarget && latlngs.length > 0) {
+      eventTarget.fire('TrackStats:fetching', {
+        datatype: 'slopes',
+        size: latlngs.length,
+      });
+    }
+
     return new Promise(async (resolve, reject) => {
       try {
         if (latlngs.length > 0) {
-          const slopes = await fetcher.fetchSlopes(latlngs);
+          const slopes = await fetcher.fetchSlopes(latlngs, eventTarget);
           slopes.forEach(x => cache.addSlope(x));
+
+          if (eventTarget) {
+            eventTarget.fire('TrackStats:done', {
+              datatype: 'slopes',
+              size: slopes.length,
+            });
+          }
         }
         resolve();
       } catch (e) {
@@ -60,16 +90,8 @@ L.Polyline.include({
     });
   },
 
-  fetchInfos(fetcher) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.fetchAltitude(fetcher);
-        await this.fetchSlope(fetcher);
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
+  fetchInfos(fetcher, eventTarget) {
+    return Promise.all([this.fetchAltitude(fetcher, eventTarget), this.fetchSlope(fetcher, eventTarget)]);
   },
 
   computeStats() {

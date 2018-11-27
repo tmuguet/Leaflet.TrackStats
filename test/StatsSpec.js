@@ -1,5 +1,7 @@
 describe('Stats', () => {
   let map;
+  const Listener = L.Evented.extend({});
+  let listener;
   const latlngs = [
     [44.988659, 6.078873],
     [44.988783, 6.078814],
@@ -598,12 +600,79 @@ describe('Stats', () => {
       center: L.latLng(44.96777356135154, 6.06822967529297),
       zoom: 13,
     });
+    listener = new Listener();
   });
 
   afterEach(async () => {
     sinon.restore();
+    listener.off();
     await map.removeAsPromise();
     L.TrackStats.cache.clear();
+  });
+
+  describe('Initalization', () => {
+    it('Initialization with no latlngs should fail gracefully', async () => {
+      const stats = new L.TrackStats.Stats([]);
+      expect(stats.getLatLngs()).to.be.deep.equal([]);
+    });
+  });
+
+  describe('Fetching data', () => {
+    it('fetching altitudes should fire events', async () => {
+      let eventsStart = 0;
+      let eventsDone = 0;
+      listener.on('TrackStats:fetching', (e) => {
+        eventsStart += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(latlngs.length);
+      });
+      listener.on('TrackStats:done', (e) => {
+        eventsDone += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(latlngs.length);
+      });
+
+      const fetcher = {
+        fetchAltitudes(array, l) {
+          expect(l).to.be.equal(listener);
+          return new Promise((resolve) => {
+            resolve(array.map((x, i) => ({ lat: x.lat, lng: x.lng, z: i })));
+          });
+        },
+      };
+      const polyline = L.polyline(latlngs);
+      await polyline.fetchAltitude(fetcher, listener);
+      expect(eventsStart).to.be.equal(1);
+      expect(eventsDone).to.be.equal(1);
+    });
+
+    it('fetching slopes should fire events', async () => {
+      let eventsStart = 0;
+      let eventsDone = 0;
+      listener.on('TrackStats:fetching', (e) => {
+        eventsStart += 1;
+        expect(e.datatype).to.be.equal('slopes');
+        expect(e.size).to.be.equal(latlngs.length);
+      });
+      listener.on('TrackStats:done', (e) => {
+        eventsDone += 1;
+        expect(e.datatype).to.be.equal('slopes');
+        expect(e.size).to.be.equal(latlngs.length);
+      });
+
+      const fetcher = {
+        fetchSlopes(array, l) {
+          expect(l).to.be.equal(listener);
+          return new Promise((resolve) => {
+            resolve(array.map((x, i) => ({ lat: x.lat, lng: x.lng, slope: i })));
+          });
+        },
+      };
+      const polyline = L.polyline(latlngs);
+      await polyline.fetchSlope(fetcher, listener);
+      expect(eventsStart).to.be.equal(1);
+      expect(eventsDone).to.be.equal(1);
+    });
   });
 
   describe('Compute partial stats', () => {
