@@ -136,7 +136,7 @@ describe('Geoportail', () => {
   });
 
   describe('Slopes', () => {
-    it('fetching one altitude should give correct result', async () => {
+    it('fetching one slope should give correct result', async () => {
       const gp = L.TrackStats.geoportail('key', map);
       const latlng = L.latLng(44.971296, 6.070504);
 

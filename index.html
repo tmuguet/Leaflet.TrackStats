@@ -37,7 +37,8 @@
         var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
         map.addLayer(osm);
 
-        var trackstats = L.TrackStats.geoportail('<key>', map);
+        // var trackstats = L.TrackStats.geoportail('<key>', map);
+        var trackstats = L.TrackStats.mapquest('<key>', map);
 
         var track1 = [
           [44.987301, 6.079355],
@@ -2908,6 +2909,7 @@
           })
           .catch(err => {
             $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Error: ' + err + '<br>');
+            polyline.bindTooltip(err);
             console.log(err);
           });
 
@@ -2940,6 +2942,7 @@
           })
           .catch(err => {
             $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Error: ' + err + '<br>');
+            polyline2.bindTooltip(err);
             console.log(err);
           });
 
@@ -2972,6 +2975,7 @@
           })
           .catch(err => {
             $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Error: ' + err + '<br>');
+            polyline3.bindTooltip(err);
             console.log(err);
           });
       };
