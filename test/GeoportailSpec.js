@@ -1,12 +1,16 @@
 describe('Geoportail', () => {
   let map;
 
+  const Listener = L.Evented.extend({});
+  let listener;
+
   beforeEach(() => {
     const _this = this;
     map = L.map('map', {
       center: L.latLng(44.96777356135154, 6.06822967529297),
       zoom: 13,
     });
+    listener = new Listener();
 
     this.xhr = sinon.useFakeXMLHttpRequest();
     this.requests = [];
@@ -19,6 +23,7 @@ describe('Geoportail', () => {
   afterEach(async () => {
     this.xhr.restore();
     sinon.restore();
+    listener.off();
     await map.removeAsPromise();
   });
 
@@ -27,7 +32,14 @@ describe('Geoportail', () => {
       const gp = L.TrackStats.geoportail('key', map);
       const latlng = L.latLng(44.971296, 6.070504);
 
-      const promise = gp.fetchAltitudes([latlng]);
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(1);
+      });
+
+      const promise = gp.fetchAltitudes([latlng], listener);
       expect(this.requests).to.be.lengthOf(1);
       this.requests[0].respond(
         200,
@@ -39,6 +51,8 @@ describe('Geoportail', () => {
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(1);
       expect(result[0]).to.deep.equal({ lat: 44.971296, lng: 6.070504, z: 1900.64 });
+
+      expect(events).to.be.equal(1);
     });
 
     it('fetching multiple batches should give correct result', async () => {
@@ -65,7 +79,14 @@ describe('Geoportail', () => {
       }
       xmlBatch2 += '</elevations>';
 
-      const promise = gp.fetchAltitudes(latlngs);
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(events === 1 ? 50 : 30);
+      });
+
+      const promise = gp.fetchAltitudes(latlngs, listener);
       expect(this.requests).to.be.lengthOf(2);
       this.requests[0].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch1);
       this.requests[1].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch2);
@@ -74,6 +95,8 @@ describe('Geoportail', () => {
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(80);
       expect(result).to.deep.equal(expectedResults);
+
+      expect(events).to.be.equal(2);
     });
 
     it('HTTP error to one batch should reject the promise', async () => {
@@ -113,11 +136,18 @@ describe('Geoportail', () => {
   });
 
   describe('Slopes', () => {
-    it('fetching one altitude should give correct result', async () => {
+    it('fetching one slope should give correct result', async () => {
       const gp = L.TrackStats.geoportail('key', map);
       const latlng = L.latLng(44.971296, 6.070504);
 
-      const promise = gp.fetchSlopes([latlng]);
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('slopes');
+        expect(e.size).to.be.equal(1);
+      });
+
+      const promise = gp.fetchSlopes([latlng], listener);
       expect(this.requests).to.be.lengthOf(1);
       this.requests[0].respond(
         200,
@@ -139,6 +169,8 @@ describe('Geoportail', () => {
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(1);
       expect(result[0]).to.deep.equal({ lat: 44.971296, lng: 6.070504, slope: 40 });
+
+      expect(events).to.be.equal(1);
     });
 
     it('fetching multiple batches should give correct result', async () => {
@@ -765,7 +797,14 @@ describe('Geoportail', () => {
         },
       ];
 
-      const promise = gp.fetchSlopes(latlngs);
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('slopes');
+        expect(e.size).to.be.equal(events === 1 ? jsonBatch1.length : jsonBatch2.length);
+      });
+
+      const promise = gp.fetchSlopes(latlngs, listener);
       expect(this.requests).to.be.lengthOf(2);
       this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({ results: jsonBatch1 }));
       this.requests[1].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({ results: jsonBatch2 }));
@@ -774,6 +813,8 @@ describe('Geoportail', () => {
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(68);
       expect(result).to.deep.equal(expectedResults);
+
+      expect(events).to.be.equal(2);
     });
 
     it('HTTP error to one batch should reject the promise', async () => {

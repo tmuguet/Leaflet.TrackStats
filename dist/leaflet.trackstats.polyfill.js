@@ -972,7 +972,7 @@ module.exports = {
   },
   has: function has(t, coords) {
     var key = getKey(coords);
-    return key in metadatas && t in metadatas[key];
+    return key in metadatas && (t === null || t in metadatas[key]);
   },
   hasZ: function hasZ(coords) {
     return this.has('z', coords);
@@ -1042,7 +1042,7 @@ module.exports = L.Class.extend({
     this._map = map;
     L.Util.setOptions(this, options);
   },
-  fetchAltitudes: function fetchAltitudes(latlngs) {
+  fetchAltitudes: function fetchAltitudes(latlngs, eventTarget) {
     var _this = this;
 
     var geometry = [];
@@ -1055,13 +1055,13 @@ module.exports = L.Class.extend({
 
       if (geometry.length === 50) {
         // Launch batch
-        promises.push(_this._fetchBatchAltitude(geometry.splice(0)));
+        promises.push(_this._fetchBatchAltitude(geometry.splice(0), eventTarget));
       }
     });
 
     if (geometry.length > 0) {
       // Launch last batch
-      promises.push(this._fetchBatchAltitude(geometry.splice(0)));
+      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
     }
 
     return new Promise(
@@ -1107,7 +1107,7 @@ module.exports = L.Class.extend({
       };
     }());
   },
-  _fetchBatchAltitude: function _fetchBatchAltitude(geometry) {
+  _fetchBatchAltitude: function _fetchBatchAltitude(geometry, eventTarget) {
     var _this2 = this;
 
     return new Promise(function (resolve, reject) {
@@ -1124,6 +1124,14 @@ module.exports = L.Class.extend({
               z: val.z
             });
           });
+
+          if (eventTarget) {
+            eventTarget.fire('TrackStats:fetched', {
+              datatype: 'altitudes',
+              size: elevations.length
+            });
+          }
+
           resolve(elevations);
         },
         onFailure: function onFailure(error) {
@@ -1132,7 +1140,7 @@ module.exports = L.Class.extend({
       });
     });
   },
-  fetchSlopes: function fetchSlopes(latlngs) {
+  fetchSlopes: function fetchSlopes(latlngs, eventTarget) {
     var _this3 = this;
 
     var tiles = {};
@@ -1158,7 +1166,7 @@ module.exports = L.Class.extend({
     Object.keys(tiles).forEach(function (x) {
       Object.keys(tiles[x]).forEach(function (y) {
         tiles[x][y].forEach(function (batch) {
-          promises.push(_this3._fetchBatchSlope(x, y, batch));
+          promises.push(_this3._fetchBatchSlope(x, y, batch, eventTarget));
         });
       });
     });
@@ -1205,7 +1213,7 @@ module.exports = L.Class.extend({
       };
     }());
   },
-  _fetchBatchSlope: function _fetchBatchSlope(tilex, tiley, coords) {
+  _fetchBatchSlope: function _fetchBatchSlope(tilex, tiley, coords, eventTarget) {
     var tilematrix = 16;
     var tilerow = tiley;
     var tilecol = tilex;
@@ -1243,6 +1251,14 @@ module.exports = L.Class.extend({
                   slope: val.slope
                 });
               });
+
+              if (eventTarget) {
+                eventTarget.fire('TrackStats:fetched', {
+                  datatype: 'slopes',
+                  size: slopes.length
+                });
+              }
+
               resolve(slopes);
             } else {
               reject(new Error("Impossible d'obtenir les données de pentes: résultats invalides"));
@@ -1271,23 +1287,330 @@ module.exports = L.Class.extend({
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
-_dereq_('./stats');
+_dereq_('./stats.polyline');
+
+_dereq_('./stats.trackdrawer');
+
+var Stats = _dereq_('./stats');
 
 var cache = _dereq_('./cache');
 
 var Geoportail = _dereq_('./geoportail');
 
+var Mapquest = _dereq_('./mapquest');
+
 L.TrackStats = {
   cache: cache,
   Geoportail: Geoportail,
+  Mapquest: Mapquest,
+  Stats: Stats,
   geoportail: function geoportail(apiKey, map, options) {
     return new Geoportail(apiKey, map, options);
+  },
+  mapquest: function mapquest(apiKey, map, options) {
+    return new Mapquest(apiKey, map, options);
   }
 };
 module.exports = L.TrackStats;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":11,"./geoportail":12,"./stats":14}],14:[function(_dereq_,module,exports){
+},{"./cache":11,"./geoportail":12,"./mapquest":14,"./stats":15,"./stats.polyline":16,"./stats.trackdrawer":17}],14:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
+
+var _regenerator = _interopRequireDefault(_dereq_("@babel/runtime/regenerator"));
+
+var _toConsumableArray2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/toConsumableArray"));
+
+var _asyncToGenerator2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/asyncToGenerator"));
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
+var corslite = _dereq_('@mapbox/corslite');
+
+module.exports = L.Class.extend({
+  options: {},
+  initialize: function initialize(apiKey, map, options) {
+    this._apiKey = apiKey;
+    this._map = map;
+    L.Util.setOptions(this, options);
+  },
+  fetchAltitudes: function fetchAltitudes(latlngs, eventTarget) {
+    var _this = this;
+
+    var geometry = [];
+    var promises = [];
+    latlngs.forEach(function (coords) {
+      geometry.push({
+        lon: coords.lng,
+        lat: coords.lat
+      });
+
+      if (geometry.length === 50) {
+        // Launch batch
+        promises.push(_this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+      }
+    });
+
+    if (geometry.length > 0) {
+      // Launch last batch
+      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+    }
+
+    return new Promise(
+    /*#__PURE__*/
+    function () {
+      var _ref = (0, _asyncToGenerator2.default)(
+      /*#__PURE__*/
+      _regenerator.default.mark(function _callee(resolve, reject) {
+        var data, results;
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return Promise.all(promises);
+
+              case 3:
+                data = _context.sent;
+                results = [];
+                data.forEach(function (x) {
+                  return results.push.apply(results, (0, _toConsumableArray2.default)(x));
+                });
+                resolve(results);
+                _context.next = 12;
+                break;
+
+              case 9:
+                _context.prev = 9;
+                _context.t0 = _context["catch"](0);
+                reject(_context.t0);
+
+              case 12:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this, [[0, 9]]);
+      }));
+
+      return function (_x, _x2) {
+        return _ref.apply(this, arguments);
+      };
+    }());
+  },
+  _fetchBatchAltitude: function _fetchBatchAltitude(geometry, eventTarget) {
+    var latlngs = geometry.map(function (x) {
+      return "".concat(x.lat, ",").concat(x.lon);
+    }).join(',');
+    var url = 'https://open.mapquestapi.com/elevation/v1/profile?shapeFormat=raw&' + "latLngCollection=".concat(latlngs, "&key=").concat(this._apiKey);
+    return new Promise(function (resolve, reject) {
+      corslite(url, function (err, resp) {
+        if (!err) {
+          try {
+            var data = JSON.parse(resp.responseText);
+            var elevations = [];
+            var previous;
+            var hasUndefinedValue = false;
+            data.elevationProfile.forEach(function (val, i) {
+              if (val.height === -32768) {
+                // If no height data exists, API returns -32768
+                // As an approximation, we'll use the previous value
+                val.height = previous;
+                if (previous === undefined) hasUndefinedValue = true;
+              }
+
+              elevations.push({
+                lat: data.shapePoints[i * 2],
+                lng: data.shapePoints[i * 2 + 1],
+                z: val.height
+              });
+              previous = val.height;
+            });
+
+            if (hasUndefinedValue) {
+              // If we're unlucky and no height data exists for the first point(s),
+              // then we approximate to the next value
+              for (var i = elevations.length - 1; i >= 0; i -= 1) {
+                if (elevations[i].z === undefined) {
+                  elevations[i].z = previous;
+                }
+
+                previous = elevations[i].z;
+              }
+            }
+
+            if (eventTarget) {
+              eventTarget.fire('TrackStats:fetched', {
+                datatype: 'altitudes',
+                size: elevations.length
+              });
+            }
+
+            resolve(elevations);
+          } catch (ex) {
+            reject(ex);
+          }
+        } else {
+          reject(new Error(err.response));
+        }
+      }, false);
+    });
+  },
+  fetchSlopes: function fetchSlopes() {
+    return new Promise(
+    /*#__PURE__*/
+    function () {
+      var _ref2 = (0, _asyncToGenerator2.default)(
+      /*#__PURE__*/
+      _regenerator.default.mark(function _callee2(resolve, reject) {
+        return _regenerator.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                reject(new Error('Unsupported'));
+
+              case 1:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      return function (_x3, _x4) {
+        return _ref2.apply(this, arguments);
+      };
+    }());
+  }
+});
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8}],15:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
+var stats = L.Class.extend({
+  options: {},
+  initialize: function initialize(latlngs, options) {
+    L.Util.setOptions(this, options);
+    this.startingDistance = 0;
+    this.distance = 0;
+    this.altMin = Number.MAX_VALUE;
+    this.altMax = Number.MIN_VALUE;
+    this.heightDiffUp = 0;
+    this.heightDiffDown = 0;
+    this.slopeMin = Number.MAX_VALUE;
+    this.slopeMax = Number.MIN_VALUE;
+    this.slopeTerrainMin = Number.MAX_VALUE;
+    this.slopeTerrainMax = Number.MIN_VALUE;
+    this.latlngs = [];
+
+    if (latlngs.length === 0) {
+      return;
+    }
+
+    var elevations = JSON.parse(JSON.stringify(latlngs)); // deep copy
+
+    this.altMin = elevations[0].z;
+    this.altMax = elevations[0].z;
+    this.slopeTerrainMin = elevations[0].slope;
+    this.slopeTerrainMax = elevations[0].slope;
+    elevations[0].dist = 0;
+    elevations[0].slopeOnTrack = 0;
+    this.latlngs.push(elevations[0]);
+    var j = 0;
+
+    for (var i = 1; i < elevations.length; i += 1) {
+      var localDistance = L.latLng(elevations[i]).distanceTo(L.latLng(this.latlngs[j])); // m
+
+      if (localDistance > 0) {
+        this.distance += localDistance / 1000; // km
+
+        j += 1;
+        this.latlngs[j] = elevations[i];
+        var current = this.latlngs[j];
+        current.dist = this.distance;
+        current.slopeOnTrack = Math.degrees(Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance));
+        if (current.z < this.altMin) this.altMin = current.z;
+        if (current.z > this.altMax) this.altMax = current.z;
+        if (current.slopeOnTrack < this.slopeMin) this.slopeMin = current.slopeOnTrack;
+        if (current.slopeOnTrack > this.slopeMax) this.slopeMax = current.slopeOnTrack;
+
+        if (current.z < this.latlngs[j - 1].z) {
+          this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
+        } else {
+          this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
+        }
+
+        if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
+        if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
+      }
+    }
+
+    if (this.altMin === undefined) {
+      this.heightDiffUp = undefined;
+      this.heightDiffDown = undefined;
+      this.slopeMax = undefined;
+      this.slopeMin = undefined;
+    }
+  },
+  accumulate: function accumulate(accumulator) {
+    accumulator.latlngs = accumulator.latlngs.concat(this.getLatLngs().map(function (x) {
+      x.dist += accumulator.distance;
+      return x;
+    }));
+    accumulator.distance += this.distance;
+    accumulator.altMin = Math.min(this.altMin, accumulator.altMin);
+    accumulator.altMax = Math.max(this.altMax, accumulator.altMax);
+    accumulator.heightDiffUp += this.heightDiffUp;
+    accumulator.heightDiffDown += this.heightDiffDown;
+    accumulator.slopeMin = Math.min(this.slopeMin, accumulator.slopeMin);
+    accumulator.slopeMax = Math.max(this.slopeMax, accumulator.slopeMax);
+    accumulator.slopeTerrainMin = Math.min(this.slopeTerrainMin, accumulator.slopeTerrainMin);
+    accumulator.slopeTerrainMax = Math.max(this.slopeTerrainMax, accumulator.slopeTerrainMax);
+    return this;
+  },
+  getLatLngs: function getLatLngs() {
+    return JSON.parse(JSON.stringify(this.latlngs)); // deep copy
+  },
+  getDistance: function getDistance() {
+    return this.distance;
+  },
+  getAltMin: function getAltMin() {
+    return this.altMin;
+  },
+  getAltMax: function getAltMax() {
+    return this.altMax;
+  },
+  getSlopeMin: function getSlopeMin() {
+    return this.slopeMin;
+  },
+  getSlopeMax: function getSlopeMax() {
+    return this.slopeMax;
+  },
+  getHeightDiffUp: function getHeightDiffUp() {
+    return this.heightDiffUp;
+  },
+  getHeightDiffDown: function getHeightDiffDown() {
+    return this.heightDiffDown;
+  },
+  getSlopeTerrainMin: function getSlopeTerrainMin() {
+    return this.slopeTerrainMin;
+  },
+  getSlopeTerrainMax: function getSlopeTerrainMax() {
+    return this.slopeTerrainMax;
+  }
+});
+module.exports = stats;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],16:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1300,6 +1623,8 @@ var _asyncToGenerator2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
 var cache = _dereq_('./cache');
+
+var Stats = _dereq_('./stats');
 
 if (typeof Math.degrees === 'undefined') {
   // Converts from radians to degrees.
@@ -1324,114 +1649,23 @@ function getLatLngsFlatten(polyline) {
   return latlngs;
 }
 
-function computePathStats(polyline) {
-  var latlngs = getLatLngsFlatten(polyline);
-  var elevations = latlngs.map(function (coords) {
-    return coords.getCachedInfos();
-  });
-
-  if (elevations.length === 0) {
-    return null;
-  }
-
-  var results = {
-    distance: 0,
-    altMin: elevations[0].z,
-    altMax: elevations[0].z,
-    heightDiffUp: 0,
-    heightDiffDown: 0,
-    slopeMin: Number.MAX_VALUE,
-    slopeMax: Number.MIN_VALUE,
-    slopeTerrainMin: elevations[0].slope,
-    slopeTerrainMax: elevations[0].slope,
-    elevations: []
-  };
-  elevations[0].dist = 0;
-  elevations[0].slopeOnTrack = 0;
-  results.elevations.push(elevations[0]);
-  var j = 0;
-
-  for (var i = 1; i < elevations.length; i += 1) {
-    var localDistance = L.latLng(elevations[i]).distanceTo(L.latLng(results.elevations[j])); // m
-
-    if (localDistance > 0) {
-      results.distance += localDistance / 1000; // km
-
-      j += 1;
-      results.elevations[j] = elevations[i];
-      results.elevations[j].dist = results.distance;
-      results.elevations[j].slopeOnTrack = Math.degrees(Math.atan((Math.round(results.elevations[j].z) - Math.round(results.elevations[j - 1].z)) / localDistance));
-      if (results.elevations[j].z < results.altMin) results.altMin = results.elevations[j].z;
-      if (results.elevations[j].z > results.altMax) results.altMax = results.elevations[j].z;
-      if (results.elevations[j].slopeOnTrack < results.slopeMin) results.slopeMin = results.elevations[j].slopeOnTrack;
-      if (results.elevations[j].slopeOnTrack > results.slopeMax) results.slopeMax = results.elevations[j].slopeOnTrack;
-
-      if (results.elevations[j].z < results.elevations[j - 1].z) {
-        results.heightDiffDown += Math.round(results.elevations[j - 1].z - results.elevations[j].z);
-      } else {
-        results.heightDiffUp += Math.round(results.elevations[j].z - results.elevations[j - 1].z);
-      }
-
-      if (results.elevations[j].slope < results.slopeTerrainMin) results.slopeTerrainMin = results.elevations[j].slope;
-      if (results.elevations[j].slope > results.slopeTerrainMax) results.slopeTerrainMax = results.elevations[j].slope;
-    }
-  }
-
-  if (results.altMin === undefined) {
-    results.heightDiffUp = undefined;
-    results.heightDiffDown = undefined;
-    results.slopeMax = undefined;
-    results.slopeMin = undefined;
-  }
-
-  return results;
-}
-
 L.Polyline.include({
-  _elevations: [],
-  _distance: 0,
-  _altMin: 0,
-  _altMax: 0,
-  _slopeMin: 0,
-  _slopeMax: 0,
-  _heightDiffUp: 0,
-  _heightDiffDown: 0,
-  _slopeTerrainMin: 0,
-  _slopeTerrainMax: 0,
-  getElevations: function getElevations() {
-    return JSON.parse(JSON.stringify(this._elevations)); // deep copy
+  _stats: undefined,
+  getStats: function getStats() {
+    return this._stats;
   },
-  getDistance: function getDistance() {
-    return this._distance;
-  },
-  getAltMin: function getAltMin() {
-    return this._altMin;
-  },
-  getAltMax: function getAltMax() {
-    return this._altMax;
-  },
-  getSlopeMin: function getSlopeMin() {
-    return this._slopeMin;
-  },
-  getSlopeMax: function getSlopeMax() {
-    return this._slopeMax;
-  },
-  getHeightDiffUp: function getHeightDiffUp() {
-    return this._heightDiffUp;
-  },
-  getHeightDiffDown: function getHeightDiffDown() {
-    return this._heightDiffDown;
-  },
-  getSlopeTerrainMin: function getSlopeTerrainMin() {
-    return this._slopeTerrainMin;
-  },
-  getSlopeTerrainMax: function getSlopeTerrainMax() {
-    return this._slopeTerrainMax;
-  },
-  fetchAltitude: function fetchAltitude(fetcher) {
-    var latlngs = Array.from(new Set(getLatLngsFlatten(this).filter(function (coords) {
+  fetchAltitude: function fetchAltitude(fetcher, eventTarget) {
+    var latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(function (coords) {
       return !cache.hasZ(coords);
-    })));
+    });
+
+    if (eventTarget && latlngs.length > 0) {
+      eventTarget.fire('TrackStats:fetching', {
+        datatype: 'altitudes',
+        size: latlngs.length
+      });
+    }
+
     return new Promise(
     /*#__PURE__*/
     function () {
@@ -1446,12 +1680,12 @@ L.Polyline.include({
                 _context.prev = 0;
 
                 if (!(latlngs.length > 0)) {
-                  _context.next = 6;
+                  _context.next = 7;
                   break;
                 }
 
                 _context.next = 4;
-                return fetcher.fetchAltitudes(latlngs);
+                return fetcher.fetchAltitudes(latlngs, eventTarget);
 
               case 4:
                 elevations = _context.sent;
@@ -1459,22 +1693,29 @@ L.Polyline.include({
                   return cache.addZ(x);
                 });
 
-              case 6:
+                if (eventTarget) {
+                  eventTarget.fire('TrackStats:done', {
+                    datatype: 'altitudes',
+                    size: elevations.length
+                  });
+                }
+
+              case 7:
                 resolve();
-                _context.next = 12;
+                _context.next = 13;
                 break;
 
-              case 9:
-                _context.prev = 9;
+              case 10:
+                _context.prev = 10;
                 _context.t0 = _context["catch"](0);
                 reject(_context.t0);
 
-              case 12:
+              case 13:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 9]]);
+        }, _callee, this, [[0, 10]]);
       }));
 
       return function (_x, _x2) {
@@ -1482,10 +1723,18 @@ L.Polyline.include({
       };
     }());
   },
-  fetchSlope: function fetchSlope(fetcher) {
-    var latlngs = Array.from(new Set(getLatLngsFlatten(this).filter(function (coords) {
+  fetchSlope: function fetchSlope(fetcher, eventTarget) {
+    var latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(function (coords) {
       return !cache.hasSlope(coords);
-    })));
+    });
+
+    if (eventTarget && latlngs.length > 0) {
+      eventTarget.fire('TrackStats:fetching', {
+        datatype: 'slopes',
+        size: latlngs.length
+      });
+    }
+
     return new Promise(
     /*#__PURE__*/
     function () {
@@ -1500,12 +1749,12 @@ L.Polyline.include({
                 _context2.prev = 0;
 
                 if (!(latlngs.length > 0)) {
-                  _context2.next = 6;
+                  _context2.next = 7;
                   break;
                 }
 
                 _context2.next = 4;
-                return fetcher.fetchSlopes(latlngs);
+                return fetcher.fetchSlopes(latlngs, eventTarget);
 
               case 4:
                 slopes = _context2.sent;
@@ -1513,22 +1762,29 @@ L.Polyline.include({
                   return cache.addSlope(x);
                 });
 
-              case 6:
+                if (eventTarget) {
+                  eventTarget.fire('TrackStats:done', {
+                    datatype: 'slopes',
+                    size: slopes.length
+                  });
+                }
+
+              case 7:
                 resolve();
-                _context2.next = 12;
+                _context2.next = 13;
                 break;
 
-              case 9:
-                _context2.prev = 9;
+              case 10:
+                _context2.prev = 10;
                 _context2.t0 = _context2["catch"](0);
                 reject(_context2.t0);
 
-              case 12:
+              case 13:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 9]]);
+        }, _callee2, this, [[0, 10]]);
       }));
 
       return function (_x3, _x4) {
@@ -1536,68 +1792,15 @@ L.Polyline.include({
       };
     }());
   },
-  fetchInfos: function fetchInfos(fetcher) {
-    var _this = this;
-
-    return new Promise(
-    /*#__PURE__*/
-    function () {
-      var _ref3 = (0, _asyncToGenerator2.default)(
-      /*#__PURE__*/
-      _regenerator.default.mark(function _callee3(resolve, reject) {
-        return _regenerator.default.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _context3.prev = 0;
-                _context3.next = 3;
-                return _this.fetchAltitude(fetcher);
-
-              case 3:
-                _context3.next = 5;
-                return _this.fetchSlope(fetcher);
-
-              case 5:
-                resolve();
-                _context3.next = 11;
-                break;
-
-              case 8:
-                _context3.prev = 8;
-                _context3.t0 = _context3["catch"](0);
-                reject(_context3.t0);
-
-              case 11:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this, [[0, 8]]);
-      }));
-
-      return function (_x5, _x6) {
-        return _ref3.apply(this, arguments);
-      };
-    }());
+  fetchInfos: function fetchInfos(fetcher, eventTarget) {
+    return Promise.all([this.fetchAltitude(fetcher, eventTarget), this.fetchSlope(fetcher, eventTarget)]);
   },
   computeStats: function computeStats() {
-    var results = computePathStats(this);
-
-    if (results === null) {
-      return false;
-    }
-
-    this._elevations = results.elevations;
-    this._distance = results.distance;
-    this._altMin = results.altMin;
-    this._altMax = results.altMax;
-    this._slopeMin = results.slopeMin;
-    this._slopeMax = results.slopeMax;
-    this._heightDiffUp = results.heightDiffUp;
-    this._heightDiffDown = results.heightDiffDown;
-    this._slopeTerrainMin = results.slopeTerrainMin;
-    this._slopeTerrainMax = results.slopeTerrainMax;
-    return true;
+    var latlngs = getLatLngsFlatten(this).map(function (coords) {
+      return coords.getCachedInfos();
+    });
+    this._stats = new Stats(latlngs);
+    return this.getStats();
   }
 });
 
@@ -1606,4 +1809,161 @@ L.LatLng.prototype.getCachedInfos = function getCachedInfos() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":11,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}]},{},[13]);
+},{"./cache":11,"./stats":15,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}],17:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefault");
+
+var _regenerator = _interopRequireDefault(_dereq_("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/asyncToGenerator"));
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
+var Stats = _dereq_('./stats');
+
+if (L.TrackDrawer !== undefined) {
+  L.TrackDrawer.Track.include({
+    _steps: undefined,
+    _total: undefined,
+    _i: 0,
+    _bindEvent: function _bindEvent() {
+      var _this = this;
+
+      this.on('TrackDrawer:done', function () {
+        _this._finalizeRoute(_this.options.fetcher);
+      });
+    },
+    _finalizeRoute: function _finalizeRoute(fetcher) {
+      var _this2 = this;
+
+      var routes = [];
+      this._i += 1;
+
+      var currentNode = this._getNode(this._firstNodeId);
+
+      this._nodesContainers.forEach(function () {
+        do {
+          var _this2$_getNext = _this2._getNext(currentNode),
+              nextEdge = _this2$_getNext.nextEdge,
+              nextNode = _this2$_getNext.nextNode;
+
+          if (currentNode === undefined || nextEdge === undefined) {
+            break;
+          }
+
+          routes.push(nextEdge);
+          currentNode = nextNode;
+        } while (currentNode.options.type !== 'stopover');
+      });
+
+      return new Promise(
+      /*#__PURE__*/
+      function () {
+        var _ref = (0, _asyncToGenerator2.default)(
+        /*#__PURE__*/
+        _regenerator.default.mark(function _callee(resolve, reject) {
+          var promises;
+          return _regenerator.default.wrap(function _callee$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _context.prev = 0;
+                  promises = [];
+                  routes.forEach(function (r) {
+                    promises.push(r.fetchInfos(fetcher, _this2).then(function () {
+                      return r.computeStats();
+                    }));
+                  });
+                  _context.next = 5;
+                  return Promise.all(promises);
+
+                case 5:
+                  _this2._i -= 1;
+
+                  if (_this2._i === 0) {
+                    // Don't compute stats if this._i changed because the track is out-of-date
+                    _this2._computeStats();
+                  }
+
+                  resolve();
+                  _context.next = 14;
+                  break;
+
+                case 10:
+                  _context.prev = 10;
+                  _context.t0 = _context["catch"](0);
+                  _this2._i -= 1;
+                  reject(_context.t0);
+
+                case 14:
+                case "end":
+                  return _context.stop();
+              }
+            }
+          }, _callee, this, [[0, 10]]);
+        }));
+
+        return function (_x, _x2) {
+          return _ref.apply(this, arguments);
+        };
+      }());
+    },
+    getStatsTotal: function getStatsTotal() {
+      return this._total;
+    },
+    getStatsSteps: function getStatsSteps() {
+      return this._steps;
+    },
+    _computeStats: function _computeStats() {
+      var _this3 = this;
+
+      this._steps = [];
+      this._total = new Stats([]);
+      var local = new Stats([]);
+
+      var currentNode = this._getNode(this._firstNodeId);
+
+      this._nodesContainers.forEach(function (nodeContainer, idx) {
+        currentNode._stats = {
+          startingDistance: local.getDistance(),
+          distance: _this3._total.getDistance(),
+          z: currentNode.getLatLng().getCachedInfos().z
+        };
+        local = new Stats([]);
+        local.startingDistance = _this3._total.getDistance();
+
+        do {
+          var _this3$_getNext = _this3._getNext(currentNode),
+              nextEdge = _this3$_getNext.nextEdge,
+              nextNode = _this3$_getNext.nextNode;
+
+          if (currentNode === undefined || nextEdge === undefined) {
+            break;
+          }
+
+          nextEdge.getStats().accumulate(_this3._total).accumulate(local);
+          currentNode = nextNode;
+          currentNode._stats = {
+            startingDistance: local.getDistance(),
+            distance: _this3._total.getDistance(),
+            z: currentNode.getLatLng().getCachedInfos().z
+          };
+        } while (currentNode.options.type !== 'stopover');
+
+        var edgeContainer = _this3._edgesContainers[idx];
+        edgeContainer._stats = local;
+
+        _this3._steps.push(local);
+      });
+
+      if (this._fireEvents) this.fire('TrackDrawer:statsdone', {});
+      return this;
+    }
+  });
+  L.TrackDrawer.Track.addInitHook('_bindEvent');
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./stats":15,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}]},{},[13]);

@@ -31,7 +31,7 @@ module.exports = {
 
   has(t, coords) {
     const key = getKey(coords);
-    return key in metadatas && t in metadatas[key];
+    return key in metadatas && (t === null || t in metadatas[key]);
   },
   hasZ(coords) {
     return this.has('z', coords);
