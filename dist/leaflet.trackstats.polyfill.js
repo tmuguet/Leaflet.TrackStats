@@ -1952,7 +1952,8 @@ if (L.TrackDrawer !== undefined) {
           };
         } while (currentNode.options.type !== 'stopover');
 
-        var edgeContainer = _this3._edgesContainers[idx];
+        var edgeContainer = _this3._edgesContainers.get(idx);
+
         edgeContainer._stats = local;
 
         _this3._steps.push(local);

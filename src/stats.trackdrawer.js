@@ -96,7 +96,7 @@ if (L.TrackDrawer !== undefined) {
           };
         } while (currentNode.options.type !== 'stopover');
 
-        const edgeContainer = this._edgesContainers[idx];
+        const edgeContainer = this._edgesContainers.get(idx);
         edgeContainer._stats = local;
         this._steps.push(local);
       });
