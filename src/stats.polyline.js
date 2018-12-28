@@ -1,6 +1,6 @@
 const L = require('leaflet');
 const cache = require('./cache');
-const stats = require('./stats');
+const Stats = require('./stats');
 
 if (typeof Math.degrees === 'undefined') {
   // Converts from radians to degrees.
@@ -96,7 +96,7 @@ L.Polyline.include({
 
   computeStats() {
     const latlngs = getLatLngsFlatten(this).map(coords => coords.getCachedInfos());
-    this._stats = new stats(latlngs);
+    this._stats = new Stats(latlngs);
     return this.getStats();
   },
 });

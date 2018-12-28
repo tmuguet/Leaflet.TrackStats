@@ -59,7 +59,7 @@ module.exports = L.Class.extend({
               let hasUndefinedValue = false;
 
               data.elevationProfile.forEach((val, i) => {
-                if (val.height == -32768) {
+                if (val.height === -32768) {
                   // If no height data exists, API returns -32768
                   // As an approximation, we'll use the previous value
                   val.height = previous;
@@ -93,7 +93,7 @@ module.exports = L.Class.extend({
               reject(ex);
             }
           } else {
-            reject({ status: err.status, message: err.response });
+            reject(new Error(err.response));
           }
         },
         false,
@@ -101,7 +101,7 @@ module.exports = L.Class.extend({
     });
   },
 
-  fetchSlopes(latlngs, eventTarget) {
+  fetchSlopes() {
     return new Promise(async (resolve, reject) => {
       reject(new Error('Unsupported'));
     });

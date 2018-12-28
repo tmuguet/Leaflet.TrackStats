@@ -1,5 +1,5 @@
 const L = require('leaflet');
-const stats = require('./stats');
+const Stats = require('./stats');
 
 if (L.TrackDrawer !== undefined) {
   L.TrackDrawer.Track.include({
@@ -8,7 +8,7 @@ if (L.TrackDrawer !== undefined) {
     _i: 0,
 
     _bindEvent() {
-      this.on('TrackDrawer:done', (e) => {
+      this.on('TrackDrawer:done', () => {
         this._finalizeRoute(this.options.fetcher);
       });
     },
@@ -62,8 +62,8 @@ if (L.TrackDrawer !== undefined) {
 
     _computeStats() {
       this._steps = [];
-      this._total = new stats([]);
-      let local = new stats([]);
+      this._total = new Stats([]);
+      let local = new Stats([]);
 
       let currentNode = this._getNode(this._firstNodeId);
 
@@ -74,7 +74,7 @@ if (L.TrackDrawer !== undefined) {
           z: currentNode.getLatLng().getCachedInfos().z,
         };
 
-        local = new stats([]);
+        local = new Stats([]);
         local.startingDistance = this._total.getDistance();
 
         do {
