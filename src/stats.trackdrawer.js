@@ -67,39 +67,41 @@ if (L.TrackDrawer !== undefined) {
 
       let currentNode = this._getNode(this._firstNodeId);
 
-      this._nodesContainers.forEach((nodeContainer, idx) => {
-        currentNode._stats = {
-          startingDistance: local.getDistance(),
-          distance: this._total.getDistance(),
-          z: currentNode.getLatLng().getCachedInfos().z,
-        };
-
-        local = new Stats([]);
-        local.startingDistance = this._total.getDistance();
-
-        do {
-          const { nextEdge, nextNode } = this._getNext(currentNode);
-          if (currentNode === undefined || nextEdge === undefined) {
-            break;
-          }
-
-          nextEdge
-            .getStats()
-            .accumulate(this._total)
-            .accumulate(local);
-          currentNode = nextNode;
-
+      if (currentNode !== undefined) {
+        this._nodesContainers.forEach((nodeContainer, idx) => {
           currentNode._stats = {
             startingDistance: local.getDistance(),
             distance: this._total.getDistance(),
             z: currentNode.getLatLng().getCachedInfos().z,
           };
-        } while (currentNode.options.type !== 'stopover');
 
-        const edgeContainer = this._edgesContainers.get(idx);
-        edgeContainer._stats = local;
-        this._steps.push(local);
-      });
+          local = new Stats([]);
+          local.startingDistance = this._total.getDistance();
+
+          do {
+            const { nextEdge, nextNode } = this._getNext(currentNode);
+            if (currentNode === undefined || nextEdge === undefined) {
+              break;
+            }
+
+            nextEdge
+              .getStats()
+              .accumulate(this._total)
+              .accumulate(local);
+            currentNode = nextNode;
+
+            currentNode._stats = {
+              startingDistance: local.getDistance(),
+              distance: this._total.getDistance(),
+              z: currentNode.getLatLng().getCachedInfos().z,
+            };
+          } while (currentNode.options.type !== 'stopover');
+
+          const edgeContainer = this._edgesContainers.get(idx);
+          edgeContainer._stats = local;
+          this._steps.push(local);
+        });
+      }
 
       if (this._fireEvents) this.fire('TrackDrawer:statsdone', {});
 
