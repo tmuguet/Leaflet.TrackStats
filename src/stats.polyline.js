@@ -35,6 +35,7 @@ L.Polyline.include({
       return new Promise((resolve, reject) => reject(new Error('Unsupported')));
     }
 
+    cache.setPrecision(fetcher.precision);
     const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasZ(coords));
 
     if (eventTarget && latlngs.length > 0) {
@@ -69,6 +70,7 @@ L.Polyline.include({
       return new Promise((resolve, reject) => reject(new Error('Unsupported')));
     }
 
+    cache.setPrecision(fetcher.precision);
     const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasSlope(coords));
 
     if (eventTarget && latlngs.length > 0) {
