@@ -7,6 +7,7 @@ module.exports = L.Class.extend({
   initialize(apiKey, map, options) {
     this._apiKey = apiKey;
     this._map = map;
+    this.features = { altitudes: true, slopes: false };
     L.Util.setOptions(this, options);
   },
 
