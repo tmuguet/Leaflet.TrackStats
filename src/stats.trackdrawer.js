@@ -9,7 +9,11 @@ if (L.TrackDrawer !== undefined) {
 
     _bindEvent() {
       this.on('TrackDrawer:done', () => {
-        this._finalizeRoute(this.options.fetcher);
+        try {
+          this._finalizeRoute(this.options.fetcher);
+        } catch (e) {
+          if (this._fireEvents) this.fire('TrackDrawer:statsfailed', { message: e.message });
+        }
       });
     },
 
