@@ -45,24 +45,31 @@ const stats = L.Class.extend({
         const current = this.latlngs[j];
 
         current.dist = this.distance;
-        current.slopeOnTrack = Math.degrees(
-          Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance),
-        );
 
-        if (current.z < this.altMin) this.altMin = current.z;
-        if (current.z > this.altMax) this.altMax = current.z;
+        if (current.z) {
+          if (current.z < this.altMin) this.altMin = current.z;
+          if (current.z > this.altMax) this.altMax = current.z;
 
-        if (current.slopeOnTrack < this.slopeMin) this.slopeMin = current.slopeOnTrack;
-        if (current.slopeOnTrack > this.slopeMax) this.slopeMax = current.slopeOnTrack;
+          if (current.z < this.latlngs[j - 1].z) {
+            this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
+          } else {
+            this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
+          }
 
-        if (current.z < this.latlngs[j - 1].z) {
-          this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
+          current.slopeOnTrack = Math.degrees(
+            Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance),
+          );
+
+          if (current.slopeOnTrack < this.slopeMin) this.slopeMin = current.slopeOnTrack;
+          if (current.slopeOnTrack > this.slopeMax) this.slopeMax = current.slopeOnTrack;
         } else {
-          this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
+          current.slopeOnTrack = 0;
         }
 
-        if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
-        if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
+        if (current.slope) {
+          if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
+          if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
+        }
       }
     }
 
