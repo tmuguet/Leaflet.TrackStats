@@ -31,6 +31,11 @@ L.Polyline.include({
   },
 
   fetchAltitude(fetcher, eventTarget) {
+    if (!('altitudes' in fetcher.features) || !fetcher.features.altitudes) {
+      return new Promise((resolve, reject) => reject(new Error('Unsupported')));
+    }
+
+    cache.setPrecision(fetcher.precision);
     const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasZ(coords));
 
     if (eventTarget && latlngs.length > 0) {
@@ -61,6 +66,11 @@ L.Polyline.include({
   },
 
   fetchSlope(fetcher, eventTarget) {
+    if (!('slopes' in fetcher.features) || !fetcher.features.slopes) {
+      return new Promise((resolve, reject) => reject(new Error('Unsupported')));
+    }
+
+    cache.setPrecision(fetcher.precision);
     const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasSlope(coords));
 
     if (eventTarget && latlngs.length > 0) {
@@ -91,7 +101,15 @@ L.Polyline.include({
   },
 
   fetchInfos(fetcher, eventTarget) {
-    return Promise.all([this.fetchAltitude(fetcher, eventTarget), this.fetchSlope(fetcher, eventTarget)]);
+    const promises = [];
+    if ('altitudes' in fetcher.features && fetcher.features.altitudes) {
+      promises.push(this.fetchAltitude(fetcher, eventTarget));
+    }
+    if ('slopes' in fetcher.features && fetcher.features.slopes) {
+      promises.push(this.fetchSlope(fetcher, eventTarget));
+    }
+
+    return Promise.all(promises);
   },
 
   computeStats() {

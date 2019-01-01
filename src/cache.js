@@ -1,23 +1,29 @@
 const metadatas = {};
+let precision = 8;
 
-// Rounds to 8 decimals (IGN API does not support/give more precise data)
-if (typeof Math.roundE8 === 'undefined') {
-  Math.roundE8 = function roundE8(value) {
-    return Math.round(value * 100000000) / 100000000;
+// Rounds to X decimals (IGN API supports up to 8, MapQuest up to 5)
+if (typeof Math.roundE === 'undefined') {
+  Math.roundE = function roundE(value, decimals) {
+    const pow = 10 ** decimals;
+    return Math.round(value * pow) / pow;
   };
 }
 
-function getKeyLatLng(lat, lng) {
-  return `${Math.roundE8(lng)}/${Math.roundE8(lat)}`;
+function getKeyLatLng(lat, lng, decimals) {
+  return `${Math.roundE(lng, decimals)}/${Math.roundE(lat, decimals)}`;
 }
 
-function getKey(coords) {
-  return getKeyLatLng(coords.lat, coords.lng);
+function getKey(coords, decimals) {
+  return getKeyLatLng(coords.lat, coords.lng, decimals);
 }
 
 module.exports = {
+  setPrecision(p) {
+    precision = p;
+  },
+
   add(t, coords) {
-    const key = getKey(coords);
+    const key = getKey(coords, precision);
     if (!(key in metadatas)) metadatas[key] = {};
 
     metadatas[key][t] = coords[t];
@@ -25,12 +31,12 @@ module.exports = {
     return this;
   },
   get(t, coords) {
-    const key = getKey(coords);
+    const key = getKey(coords, precision);
     return key in metadatas && t in metadatas[key] ? metadatas[key][t] : undefined;
   },
 
   has(t, coords) {
-    const key = getKey(coords);
+    const key = getKey(coords, precision);
     return key in metadatas && (t === null || t in metadatas[key]);
   },
   hasZ(coords) {
@@ -50,7 +56,7 @@ module.exports = {
   },
 
   getAll(coords) {
-    const key = getKey(coords);
+    const key = getKey(coords, precision);
     const md = key in metadatas ? metadatas[key] : {};
 
     return {

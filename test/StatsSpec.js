@@ -633,6 +633,8 @@ describe('Stats', () => {
       });
 
       const fetcher = {
+        features: { altitudes: true },
+        precision: 8,
         fetchAltitudes(array, l) {
           expect(l).to.be.equal(listener);
           return new Promise((resolve) => {
@@ -661,6 +663,8 @@ describe('Stats', () => {
       });
 
       const fetcher = {
+        features: { slopes: true },
+        precision: 8,
         fetchSlopes(array, l) {
           expect(l).to.be.equal(listener);
           return new Promise((resolve) => {
@@ -693,6 +697,8 @@ describe('Stats', () => {
 
     it('computing stats when only altitude data is available should fail gracefully', async () => {
       const fetcher = {
+        features: { altitudes: true },
+        precision: 8,
         fetchAltitudes(array) {
           return new Promise((resolve) => {
             resolve(array.map((x, i) => ({ lat: x.lat, lng: x.lng, z: i })));
@@ -716,6 +722,8 @@ describe('Stats', () => {
 
     it('computing stats when only slope data is available should fail gracefully', async () => {
       const fetcher = {
+        features: { slopes: true },
+        precision: 8,
         fetchSlopes(array) {
           return new Promise((resolve) => {
             resolve(array.map((x, i) => ({ lat: x.lat, lng: x.lng, slope: i })));
@@ -741,6 +749,8 @@ describe('Stats', () => {
   describe('Compute full stats', () => {
     it('computing stats', async () => {
       const fetcher = {
+        features: { altitudes: true, slopes: true },
+        precision: 8,
         fetchAltitudes(array) {
           return new Promise((resolve) => {
             resolve(array.map(x => ({ lat: x.lat, lng: x.lng, z: x.lat + 2 * x.lng })));
@@ -792,6 +802,8 @@ describe('Stats', () => {
 
     it('accumulating stats should give same results than on whole polyline', async () => {
       const fetcher = {
+        features: { altitudes: true, slopes: true },
+        precision: 8,
         fetchAltitudes(array) {
           return new Promise((resolve) => {
             resolve(array.map(x => ({ lat: x.lat, lng: x.lng, z: x.lat + 2 * x.lng })));
