@@ -67,6 +67,53 @@ describe('MapQuest', () => {
       expect(events).to.be.equal(1);
     });
 
+    it('missing one altitude should gracefully fallback', async () => {
+      const gp = L.TrackStats.mapquest('key', map);
+      const latlngs = [L.latLng(44.971296, 6.070504), L.latLng(44.971396, 6.070604), L.latLng(44.971496, 6.070704)];
+
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(3);
+      });
+
+      const promise = gp.fetchAltitudes(latlngs, listener);
+      expect(this.requests).to.be.lengthOf(1);
+      this.requests[0].respond(
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({
+          elevationProfile: [
+            { distance: 0, height: -32768 },
+            { distance: 2, height: 1234 },
+            { distance: 4, height: -32768 },
+          ],
+          shapePoints: [44.971296, 6.070504, 44.971396, 6.070604, 44.971496, 6.070704],
+          info: {
+            statuscode: 0,
+            copyright: {
+              imageAltText: '© 2018 MapQuest, Inc.',
+              imageUrl: 'http://api.mqcdn.com/res/mqlogo.gif',
+              text: '© 2018 MapQuest, Inc.',
+            },
+            messages: [],
+          },
+        }),
+      );
+
+      const result = await promise;
+      expect(result).to.be.an('array');
+      expect(result).to.be.lengthOf(3);
+      expect(result).to.deep.equal([
+        { lat: 44.971296, lng: 6.070504, z: 1234 },
+        { lat: 44.971396, lng: 6.070604, z: 1234 },
+        { lat: 44.971496, lng: 6.070704, z: 1234 },
+      ]);
+
+      expect(events).to.be.equal(1);
+    });
+
     it('fetching multiple batches should give correct result', async () => {
       const gp = L.TrackStats.mapquest('key', map);
 
