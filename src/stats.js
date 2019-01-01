@@ -59,9 +59,6 @@ const stats = L.Class.extend({
           current.slopeOnTrack = Math.degrees(
             Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance),
           );
-
-          if (current.slopeOnTrack < this.slopeMin) this.slopeMin = current.slopeOnTrack;
-          if (current.slopeOnTrack > this.slopeMax) this.slopeMax = current.slopeOnTrack;
         } else {
           current.slopeOnTrack = 0;
         }
@@ -70,6 +67,23 @@ const stats = L.Class.extend({
           if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
           if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
         }
+      }
+    }
+
+    const size = this.latlngs.length;
+    for (let i = 0; i < size; i += 1) {
+      if (i > 3 && i < size - 4) {
+        this.latlngs[i].slopeOnTrack = (this.latlngs[i - 3].slopeOnTrack
+            + 2 * this.latlngs[i - 2].slopeOnTrack
+            + 4 * this.latlngs[i - 1].slopeOnTrack
+            + 8 * this.latlngs[i].slopeOnTrack
+            + 4 * this.latlngs[i + 1].slopeOnTrack
+            + 2 * this.latlngs[i + 2].slopeOnTrack
+            + this.latlngs[i + 3].slopeOnTrack)
+          / 22;
+
+        if (this.latlngs[i].slopeOnTrack < this.slopeMin) this.slopeMin = this.latlngs[i].slopeOnTrack;
+        if (this.latlngs[i].slopeOnTrack > this.slopeMax) this.slopeMax = this.latlngs[i].slopeOnTrack;
       }
     }
 
