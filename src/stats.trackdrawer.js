@@ -8,18 +8,23 @@ if (L.TrackDrawer !== undefined) {
     _i: 0,
 
     _bindEvent() {
+      this.on('TrackDrawer:start', () => {
+        this._i += 1;
+      });
+      this.on('TrackDrawer:failed', (e) => {
+        this._i -= 1;
+        if (this._fireEvents) this.fire('TrackDrawer:statsfailed', { message: e.message });
+      });
       this.on('TrackDrawer:done', () => {
-        try {
-          this._finalizeRoute(this.options.fetcher);
-        } catch (e) {
+        this._finalizeRoute(this.options.fetcher).catch((e) => {
+          this._i -= 1;
           if (this._fireEvents) this.fire('TrackDrawer:statsfailed', { message: e.message });
-        }
+        });
       });
     },
 
     _finalizeRoute(fetcher) {
       const routes = [];
-      this._i += 1;
 
       let currentNode = this._getNode(this._firstNodeId);
 
@@ -46,12 +51,11 @@ if (L.TrackDrawer !== undefined) {
           await Promise.all(promises);
           this._i -= 1;
           if (this._i === 0) {
-            // Don't compute stats if this._i changed because the track is out-of-date
+            // Compute stats only if this._i is back to 0 (otherwise the track is out-of-date)
             this._computeStats();
           }
           resolve();
         } catch (ex) {
-          this._i -= 1;
           reject(ex);
         }
       });
@@ -88,10 +92,10 @@ if (L.TrackDrawer !== undefined) {
               break;
             }
 
-            nextEdge
-              .getStats()
-              .accumulate(this._total)
-              .accumulate(local);
+            const stats = nextEdge.getStats();
+            if (stats !== undefined) {
+              stats.accumulate(this._total).accumulate(local);
+            }
             currentNode = nextNode;
 
             currentNode._stats = {
