@@ -96,35 +96,40 @@ if (typeof module !== 'undefined') module.exports = corslite;
 },{}],2:[function(_dereq_,module,exports){
 "use strict";
 
-var metadatas = {}; // Rounds to 8 decimals (IGN API does not support/give more precise data)
+var metadatas = {};
+var precision = 8; // Rounds to X decimals (IGN API supports up to 8, MapQuest up to 5)
 
-if (typeof Math.roundE8 === 'undefined') {
-  Math.roundE8 = function roundE8(value) {
-    return Math.round(value * 100000000) / 100000000;
+if (typeof Math.roundE === 'undefined') {
+  Math.roundE = function roundE(value, decimals) {
+    var pow = Math.pow(10, decimals);
+    return Math.round(value * pow) / pow;
   };
 }
 
-function getKeyLatLng(lat, lng) {
-  return "".concat(Math.roundE8(lng), "/").concat(Math.roundE8(lat));
+function getKeyLatLng(lat, lng, decimals) {
+  return "".concat(Math.roundE(lng, decimals), "/").concat(Math.roundE(lat, decimals));
 }
 
-function getKey(coords) {
-  return getKeyLatLng(coords.lat, coords.lng);
+function getKey(coords, decimals) {
+  return getKeyLatLng(coords.lat, coords.lng, decimals);
 }
 
 module.exports = {
+  setPrecision: function setPrecision(p) {
+    precision = p;
+  },
   add: function add(t, coords) {
-    var key = getKey(coords);
+    var key = getKey(coords, precision);
     if (!(key in metadatas)) metadatas[key] = {};
     metadatas[key][t] = coords[t];
     return this;
   },
   get: function get(t, coords) {
-    var key = getKey(coords);
+    var key = getKey(coords, precision);
     return key in metadatas && t in metadatas[key] ? metadatas[key][t] : undefined;
   },
   has: function has(t, coords) {
-    var key = getKey(coords);
+    var key = getKey(coords, precision);
     return key in metadatas && (t === null || t in metadatas[key]);
   },
   hasZ: function hasZ(coords) {
@@ -142,7 +147,7 @@ module.exports = {
     return this;
   },
   getAll: function getAll(coords) {
-    var key = getKey(coords);
+    var key = getKey(coords, precision);
     var md = key in metadatas ? metadatas[key] : {};
     return {
       lat: coords.lat,
@@ -197,6 +202,11 @@ module.exports = L.Class.extend({
   initialize: function initialize(apiKey, map, options) {
     this._apiKey = apiKey;
     this._map = map;
+    this.features = {
+      altitudes: true,
+      slopes: true
+    };
+    this.precision = 8;
     L.Util.setOptions(this, options);
   },
   fetchAltitudes: function fetchAltitudes(latlngs, eventTarget) {
@@ -496,6 +506,11 @@ module.exports = L.Class.extend({
   initialize: function initialize(apiKey, map, options) {
     this._apiKey = apiKey;
     this._map = map;
+    this.features = {
+      altitudes: true,
+      slopes: false
+    };
+    this.precision = 6;
     L.Util.setOptions(this, options);
   },
   fetchAltitudes: function fetchAltitudes(latlngs, eventTarget) {
@@ -697,20 +712,36 @@ var stats = L.Class.extend({
         this.latlngs[j] = elevations[i];
         var current = this.latlngs[j];
         current.dist = this.distance;
-        current.slopeOnTrack = Math.degrees(Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance));
-        if (current.z < this.altMin) this.altMin = current.z;
-        if (current.z > this.altMax) this.altMax = current.z;
-        if (current.slopeOnTrack < this.slopeMin) this.slopeMin = current.slopeOnTrack;
-        if (current.slopeOnTrack > this.slopeMax) this.slopeMax = current.slopeOnTrack;
 
-        if (current.z < this.latlngs[j - 1].z) {
-          this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
+        if (current.z) {
+          if (current.z < this.altMin) this.altMin = current.z;
+          if (current.z > this.altMax) this.altMax = current.z;
+
+          if (current.z < this.latlngs[j - 1].z) {
+            this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
+          } else {
+            this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
+          }
+
+          current.slopeOnTrack = Math.degrees(Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance));
         } else {
-          this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
+          current.slopeOnTrack = 0;
         }
 
-        if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
-        if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
+        if (current.slope) {
+          if (current.slope < this.slopeTerrainMin) this.slopeTerrainMin = current.slope;
+          if (current.slope > this.slopeTerrainMax) this.slopeTerrainMax = current.slope;
+        }
+      }
+    }
+
+    var size = this.latlngs.length;
+
+    for (var _i = 0; _i < size; _i += 1) {
+      if (_i > 3 && _i < size - 4) {
+        this.latlngs[_i].slopeOnTrack = (this.latlngs[_i - 3].slopeOnTrack + 2 * this.latlngs[_i - 2].slopeOnTrack + 4 * this.latlngs[_i - 1].slopeOnTrack + 8 * this.latlngs[_i].slopeOnTrack + 4 * this.latlngs[_i + 1].slopeOnTrack + 2 * this.latlngs[_i + 2].slopeOnTrack + this.latlngs[_i + 3].slopeOnTrack) / 22;
+        if (this.latlngs[_i].slopeOnTrack < this.slopeMin) this.slopeMin = this.latlngs[_i].slopeOnTrack;
+        if (this.latlngs[_i].slopeOnTrack > this.slopeMax) this.slopeMax = this.latlngs[_i].slopeOnTrack;
       }
     }
 
@@ -814,6 +845,13 @@ L.Polyline.include({
     return this._stats;
   },
   fetchAltitude: function fetchAltitude(fetcher, eventTarget) {
+    if (!('altitudes' in fetcher.features) || !fetcher.features.altitudes) {
+      return new Promise(function (resolve, reject) {
+        return reject(new Error('Unsupported'));
+      });
+    }
+
+    cache.setPrecision(fetcher.precision);
     var latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(function (coords) {
       return !cache.hasZ(coords);
     });
@@ -883,6 +921,13 @@ L.Polyline.include({
     }());
   },
   fetchSlope: function fetchSlope(fetcher, eventTarget) {
+    if (!('slopes' in fetcher.features) || !fetcher.features.slopes) {
+      return new Promise(function (resolve, reject) {
+        return reject(new Error('Unsupported'));
+      });
+    }
+
+    cache.setPrecision(fetcher.precision);
     var latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(function (coords) {
       return !cache.hasSlope(coords);
     });
@@ -952,7 +997,17 @@ L.Polyline.include({
     }());
   },
   fetchInfos: function fetchInfos(fetcher, eventTarget) {
-    return Promise.all([this.fetchAltitude(fetcher, eventTarget), this.fetchSlope(fetcher, eventTarget)]);
+    var promises = [];
+
+    if ('altitudes' in fetcher.features && fetcher.features.altitudes) {
+      promises.push(this.fetchAltitude(fetcher, eventTarget));
+    }
+
+    if ('slopes' in fetcher.features && fetcher.features.slopes) {
+      promises.push(this.fetchSlope(fetcher, eventTarget));
+    }
+
+    return Promise.all(promises);
   },
   computeStats: function computeStats() {
     var latlngs = getLatLngsFlatten(this).map(function (coords) {
@@ -988,15 +1043,28 @@ if (L.TrackDrawer !== undefined) {
     _bindEvent: function _bindEvent() {
       var _this = this;
 
+      this.on('TrackDrawer:start', function () {
+        _this._i += 1;
+      });
+      this.on('TrackDrawer:failed', function (e) {
+        _this._i -= 1;
+        if (_this._fireEvents) _this.fire('TrackDrawer:statsfailed', {
+          message: e.message
+        });
+      });
       this.on('TrackDrawer:done', function () {
-        _this._finalizeRoute(_this.options.fetcher);
+        _this._finalizeRoute(_this.options.fetcher).catch(function (e) {
+          _this._i -= 1;
+          if (_this._fireEvents) _this.fire('TrackDrawer:statsfailed', {
+            message: e.message
+          });
+        });
       });
     },
     _finalizeRoute: function _finalizeRoute(fetcher) {
       var _this2 = this;
 
       var routes = [];
-      this._i += 1;
 
       var currentNode = this._getNode(this._firstNodeId);
 
@@ -1040,21 +1108,20 @@ if (L.TrackDrawer !== undefined) {
                   _this2._i -= 1;
 
                   if (_this2._i === 0) {
-                    // Don't compute stats if this._i changed because the track is out-of-date
+                    // Compute stats only if this._i is back to 0 (otherwise the track is out-of-date)
                     _this2._computeStats();
                   }
 
                   resolve();
-                  _context.next = 14;
+                  _context.next = 13;
                   break;
 
                 case 10:
                   _context.prev = 10;
                   _context.t0 = _context["catch"](0);
-                  _this2._i -= 1;
                   reject(_context.t0);
 
-                case 14:
+                case 13:
                 case "end":
                   return _context.stop();
               }
@@ -1082,39 +1149,46 @@ if (L.TrackDrawer !== undefined) {
 
       var currentNode = this._getNode(this._firstNodeId);
 
-      this._nodesContainers.forEach(function (nodeContainer, idx) {
-        currentNode._stats = {
-          startingDistance: local.getDistance(),
-          distance: _this3._total.getDistance(),
-          z: currentNode.getLatLng().getCachedInfos().z
-        };
-        local = new Stats([]);
-        local.startingDistance = _this3._total.getDistance();
-
-        do {
-          var _this3$_getNext = _this3._getNext(currentNode),
-              nextEdge = _this3$_getNext.nextEdge,
-              nextNode = _this3$_getNext.nextNode;
-
-          if (currentNode === undefined || nextEdge === undefined) {
-            break;
-          }
-
-          nextEdge.getStats().accumulate(_this3._total).accumulate(local);
-          currentNode = nextNode;
+      if (currentNode !== undefined) {
+        this._nodesContainers.forEach(function (nodeContainer, idx) {
           currentNode._stats = {
             startingDistance: local.getDistance(),
             distance: _this3._total.getDistance(),
             z: currentNode.getLatLng().getCachedInfos().z
           };
-        } while (currentNode.options.type !== 'stopover');
+          local = new Stats([]);
+          local.startingDistance = _this3._total.getDistance();
 
-        var edgeContainer = _this3._edgesContainers.get(idx);
+          do {
+            var _this3$_getNext = _this3._getNext(currentNode),
+                nextEdge = _this3$_getNext.nextEdge,
+                nextNode = _this3$_getNext.nextNode;
 
-        edgeContainer._stats = local;
+            if (currentNode === undefined || nextEdge === undefined) {
+              break;
+            }
 
-        _this3._steps.push(local);
-      });
+            var stats = nextEdge.getStats();
+
+            if (stats !== undefined) {
+              stats.accumulate(_this3._total).accumulate(local);
+            }
+
+            currentNode = nextNode;
+            currentNode._stats = {
+              startingDistance: local.getDistance(),
+              distance: _this3._total.getDistance(),
+              z: currentNode.getLatLng().getCachedInfos().z
+            };
+          } while (currentNode.options.type !== 'stopover');
+
+          var edgeContainer = _this3._edgesContainers.get(idx);
+
+          edgeContainer._stats = local;
+
+          _this3._steps.push(local);
+        });
+      }
 
       if (this._fireEvents) this.fire('TrackDrawer:statsdone', {});
       return this;
