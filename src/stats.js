@@ -50,15 +50,16 @@ const stats = L.Class.extend({
           if (current.z < this.altMin) this.altMin = current.z;
           if (current.z > this.altMax) this.altMax = current.z;
 
-          if (current.z < this.latlngs[j - 1].z) {
-            this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
-          } else {
-            this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
-          }
+          const altDiff = current.z - this.latlngs[j - 1].z;
 
-          current.slopeOnTrack = Math.degrees(
-            Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance),
-          );
+          if (altDiff < 0) {
+            this.heightDiffDown += Math.round(-altDiff);
+          } else if (altDiff > 0) {
+            this.heightDiffUp += Math.round(altDiff);
+          }
+          // else can happen if some data is missing, we choose to ignore it
+
+          current.slopeOnTrack = Math.round(Math.degrees(Math.atan(altDiff / localDistance)));
         } else {
           current.slopeOnTrack = 0;
         }
