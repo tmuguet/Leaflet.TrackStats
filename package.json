@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "description": "Computes altitude/slope statistics on Leaflet polylines",
   "main": "dist/leaflet.trackstats.min.js",
+  "types": "src/index.d.ts",
   "scripts": {
     "browserify:polyfill": "browserify -t [ babelify --presets [ @babel/preset-env ] --plugins [ @babel/plugin-transform-runtime ] ] -t browserify-shim -p browserify-derequire -o dist/leaflet.trackstats.polyfill.js src/index.js",
     "browserify:noruntime": "browserify -t [ babelify --presets [ @babel/preset-env ] ] -t browserify-shim -p browserify-derequire -o dist/leaflet.trackstats.js src/index.js",
@@ -13,8 +14,9 @@
     "bundle": "npm run bundle:polyfill && npm run bundle:noruntime",
     "eslint": "eslint src/*.js",
     "test": "karma start karma.conf.js",
+    "doc": "typedoc --out docs/ --ignoreCompilerErrors --includeDeclarations --excludeExternals --name \"Leaflet.TrackDrawer\" --theme markdown --mdHideSources --readme none --mode file src/index.d.ts",
     "validate": "npm run bundle && npm run eslint && npm run test",
-    "version": "npm run validate"
+    "version": "npm run validate && npm run doc"
   },
   "repository": "github:tmuguet/Leaflet.TrackStats",
   "author": {
@@ -63,6 +65,8 @@
     "mocha-sinon": "^2.1.0",
     "nyc": "^13.0.1",
     "sinon": "^6.1.5",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-markdown": "^1.1.22",
     "uglify-js": "^3.4.9"
   },
   "dependencies": {
