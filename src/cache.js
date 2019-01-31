@@ -20,6 +20,7 @@ function getKey(coords, decimals) {
 module.exports = {
   setPrecision(p) {
     precision = p;
+    return this;
   },
 
   add(t, coords) {

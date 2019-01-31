@@ -964,6 +964,7 @@ function getKey(coords, decimals) {
 module.exports = {
   setPrecision: function setPrecision(p) {
     precision = p;
+    return this;
   },
   add: function add(t, coords) {
     var key = getKey(coords, precision);
@@ -1555,14 +1556,16 @@ var stats = L.Class.extend({
         if (current.z) {
           if (current.z < this.altMin) this.altMin = current.z;
           if (current.z > this.altMax) this.altMax = current.z;
+          var altDiff = current.z - this.latlngs[j - 1].z;
 
-          if (current.z < this.latlngs[j - 1].z) {
-            this.heightDiffDown += Math.round(this.latlngs[j - 1].z - current.z);
-          } else {
-            this.heightDiffUp += Math.round(current.z - this.latlngs[j - 1].z);
-          }
+          if (altDiff < 0) {
+            this.heightDiffDown += Math.round(-altDiff);
+          } else if (altDiff > 0) {
+            this.heightDiffUp += Math.round(altDiff);
+          } // else can happen if some data is missing, we choose to ignore it
 
-          current.slopeOnTrack = Math.degrees(Math.atan((Math.round(this.latlngs[j].z) - Math.round(this.latlngs[j - 1].z)) / localDistance));
+
+          current.slopeOnTrack = Math.round(Math.degrees(Math.atan(altDiff / localDistance)));
         } else {
           current.slopeOnTrack = 0;
         }
