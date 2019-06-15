@@ -133,6 +133,37 @@ describe('Geoportail', () => {
         },
       );
     });
+
+    it('HTTP error to one batch should reject the promise', async () => {
+      const gp = L.TrackStats.geoportail('key', map);
+
+      const latlngs = [];
+      const xmlBatch2 = '<elevations/>';
+
+      for (let i = 0; i < 50; i += 1) {
+        const latlng = L.latLng(44 + i / 10, 6 + i / 10);
+        latlngs.push(latlng);
+      }
+
+      for (let i = 0; i < 30; i += 1) {
+        const latlng = L.latLng(45 + i / 10, 5 + i / 10);
+        latlngs.push(latlng);
+      }
+
+      const promise = gp.fetchAltitudes(latlngs);
+      expect(this.requests).to.be.lengthOf(2);
+      this.requests[0].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch2);
+      this.requests[1].respond(500, {}, '');
+
+      return promise.then(
+        (value) => {
+          expect(true).to.be.false;
+        },
+        (reason) => {
+          expect(reason.message).to.be.equal('The response of the service is empty');
+        },
+      );
+    });
   });
 
   describe('Slopes', () => {
