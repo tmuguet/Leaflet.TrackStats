@@ -72,6 +72,7 @@
   "dependencies": {
     "install": "^0.12.1",
     "leaflet": "^1.4.0",
-    "npm": "^6.7.0"
+    "npm": "^6.7.0",
+    "promise-queue": "^2.2.5"
   }
 }

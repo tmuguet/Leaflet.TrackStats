@@ -1,8 +1,11 @@
 const L = require('leaflet');
 const corslite = require('@mapbox/corslite');
+const Queue = require('promise-queue');
 
 module.exports = L.Class.extend({
-  options: {},
+  options: {
+    queueConcurrency: 5,
+  },
 
   initialize(apiKey, map, options) {
     this._apiKey = apiKey;
@@ -10,6 +13,7 @@ module.exports = L.Class.extend({
     this.features = { altitudes: true, slopes: false };
     this.precision = 6;
     L.Util.setOptions(this, options);
+    this._queue = new Queue(this.options.queueConcurrency, Infinity);
   },
 
   fetchAltitudes(latlngs, eventTarget) {
@@ -23,13 +27,15 @@ module.exports = L.Class.extend({
       });
       if (geometry.length === 50) {
         // Launch batch
-        promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+        const g = geometry.splice(0);
+        promises.push(this._queue.add(() => this._fetchBatchAltitude(g, eventTarget)));
       }
     });
 
     if (geometry.length > 0) {
       // Launch last batch
-      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+      const g = geometry.splice(0);
+      promises.push(this._queue.add(() => this._fetchBatchAltitude(g, eventTarget)));
     }
 
     return new Promise(async (resolve, reject) => {

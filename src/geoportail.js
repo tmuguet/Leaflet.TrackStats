@@ -1,6 +1,7 @@
 const L = require('leaflet');
 const Gp = require('geoportal-access-lib');
 const corslite = require('@mapbox/corslite');
+const Queue = require('promise-queue');
 
 function latLngToTilePixel(latlng, crs, zoom, tileSize, pixelOrigin) {
   const layerPoint = crs.latLngToPoint(latlng, zoom).floor();
@@ -11,7 +12,9 @@ function latLngToTilePixel(latlng, crs, zoom, tileSize, pixelOrigin) {
 }
 
 module.exports = L.Class.extend({
-  options: {},
+  options: {
+    queueConcurrency: 5,
+  },
 
   initialize(apiKey, map, options) {
     this._apiKey = apiKey;
@@ -19,6 +22,7 @@ module.exports = L.Class.extend({
     this.features = { altitudes: true, slopes: true };
     this.precision = 8;
     L.Util.setOptions(this, options);
+    this._queue = new Queue(this.options.queueConcurrency, Infinity);
   },
 
   fetchAltitudes(latlngs, eventTarget) {
@@ -32,13 +36,15 @@ module.exports = L.Class.extend({
       });
       if (geometry.length === 50) {
         // Launch batch
-        promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+        const g = geometry.splice(0);
+        promises.push(this._queue.add(() => this._fetchBatchAltitude(g, eventTarget)));
       }
     });
 
     if (geometry.length > 0) {
       // Launch last batch
-      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+      const g = geometry.splice(0);
+      promises.push(this._queue.add(() => this._fetchBatchAltitude(g, eventTarget)));
     }
 
     return new Promise(async (resolve, reject) => {
@@ -53,31 +59,39 @@ module.exports = L.Class.extend({
     });
   },
 
+  _doFetchBatchAltitude(geometry, eventTarget, resolve, reject, retry) {
+    Gp.Services.getAltitude({
+      apiKey: this._apiKey,
+      sampling: geometry.length,
+      positions: geometry,
+      onSuccess: (result) => {
+        const elevations = [];
+        result.elevations.forEach((val) => {
+          elevations.push({ lat: val.lat, lng: val.lon, z: val.z });
+        });
+
+        if (eventTarget) {
+          eventTarget.fire('TrackStats:fetched', {
+            datatype: 'altitudes',
+            size: elevations.length,
+          });
+        }
+
+        resolve(elevations);
+      },
+      onFailure: (error) => {
+        if (retry) {
+          this._doFetchBatchAltitude(geometry, eventTarget, resolve, reject, false);
+        } else {
+          reject(new Error(error.message));
+        }
+      },
+    });
+  },
+
   _fetchBatchAltitude(geometry, eventTarget) {
     return new Promise((resolve, reject) => {
-      Gp.Services.getAltitude({
-        apiKey: this._apiKey,
-        sampling: geometry.length,
-        positions: geometry,
-        onSuccess: (result) => {
-          const elevations = [];
-          result.elevations.forEach((val) => {
-            elevations.push({ lat: val.lat, lng: val.lon, z: val.z });
-          });
-
-          if (eventTarget) {
-            eventTarget.fire('TrackStats:fetched', {
-              datatype: 'altitudes',
-              size: elevations.length,
-            });
-          }
-
-          resolve(elevations);
-        },
-        onFailure: (error) => {
-          reject(new Error(error.message));
-        },
-      });
+      this._doFetchBatchAltitude(geometry, eventTarget, resolve, reject, true);
     });
   },
 
@@ -108,7 +122,7 @@ module.exports = L.Class.extend({
     Object.keys(tiles).forEach((x) => {
       Object.keys(tiles[x]).forEach((y) => {
         tiles[x][y].forEach((batch) => {
-          promises.push(this._fetchBatchSlope(x, y, batch, eventTarget));
+          promises.push(this._queue.add(() => this._fetchBatchSlope(x, y, batch, eventTarget)));
         });
       });
     });

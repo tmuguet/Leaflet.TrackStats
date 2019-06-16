@@ -83,7 +83,7 @@ module.exports = _toConsumableArray;
 },{"./arrayWithoutHoles":1,"./iterableToArray":4,"./nonIterableSpread":5}],7:[function(_dereq_,module,exports){
 module.exports = _dereq_("regenerator-runtime");
 
-},{"regenerator-runtime":9}],8:[function(_dereq_,module,exports){
+},{"regenerator-runtime":13}],8:[function(_dereq_,module,exports){
 function corslite(url, callback, cors) {
     var sent = false;
 
@@ -179,6 +179,385 @@ function corslite(url, callback, cors) {
 if (typeof module !== 'undefined') module.exports = corslite;
 
 },{}],9:[function(_dereq_,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],10:[function(_dereq_,module,exports){
+(function (process){
+module.exports = process.env.PROMISE_QUEUE_COVERAGE ?
+    _dereq_('./lib-cov') :
+    _dereq_('./lib');
+
+}).call(this,_dereq_('_process'))
+},{"./lib":12,"./lib-cov":11,"_process":9}],11:[function(_dereq_,module,exports){
+
+},{}],12:[function(_dereq_,module,exports){
+/* global define, Promise */
+(function (root, factory) {
+    'use strict';
+    if (typeof module === 'object' && module.exports && typeof _dereq_ === 'function') {
+        // CommonJS
+        module.exports = factory();
+    } else if (typeof define === 'function' && typeof define.amd === 'object') {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else {
+        // Browser globals
+        root.Queue = factory();
+    }
+})
+(this, function () {
+    'use strict';
+
+    /**
+     * @return {Object}
+     */
+    var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
+        return {
+            then: function () {
+                throw new Error('Queue.configure() before use Queue');
+            }
+        };
+    };
+
+    var noop = function () {};
+
+    /**
+     * @param {*} value
+     * @returns {LocalPromise}
+     */
+    var resolveWith = function (value) {
+        if (value && typeof value.then === 'function') {
+            return value;
+        }
+
+        return new LocalPromise(function (resolve) {
+            resolve(value);
+        });
+    };
+
+    /**
+     * It limits concurrently executed promises
+     *
+     * @param {Number} [maxPendingPromises=Infinity] max number of concurrently executed promises
+     * @param {Number} [maxQueuedPromises=Infinity]  max number of queued promises
+     * @constructor
+     *
+     * @example
+     *
+     * var queue = new Queue(1);
+     *
+     * queue.add(function () {
+     *     // resolve of this promise will resume next request
+     *     return downloadTarballFromGithub(url, file);
+     * })
+     * .then(function (file) {
+     *     doStuffWith(file);
+     * });
+     *
+     * queue.add(function () {
+     *     return downloadTarballFromGithub(url, file);
+     * })
+     * // This request will be paused
+     * .then(function (file) {
+     *     doStuffWith(file);
+     * });
+     */
+    function Queue(maxPendingPromises, maxQueuedPromises, options) {
+        this.options = options = options || {};
+        this.pendingPromises = 0;
+        this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
+        this.maxQueuedPromises = typeof maxQueuedPromises !== 'undefined' ? maxQueuedPromises : Infinity;
+        this.queue = [];
+    }
+
+    /**
+     * Defines promise promiseFactory
+     * @param {Function} GlobalPromise
+     */
+    Queue.configure = function (GlobalPromise) {
+        LocalPromise = GlobalPromise;
+    };
+
+    /**
+     * @param {Function} promiseGenerator
+     * @return {LocalPromise}
+     */
+    Queue.prototype.add = function (promiseGenerator) {
+        var self = this;
+        return new LocalPromise(function (resolve, reject, notify) {
+            // Do not queue to much promises
+            if (self.queue.length >= self.maxQueuedPromises) {
+                reject(new Error('Queue limit reached'));
+                return;
+            }
+
+            // Add to queue
+            self.queue.push({
+                promiseGenerator: promiseGenerator,
+                resolve: resolve,
+                reject: reject,
+                notify: notify || noop
+            });
+
+            self._dequeue();
+        });
+    };
+
+    /**
+     * Number of simultaneously running promises (which are resolving)
+     *
+     * @return {number}
+     */
+    Queue.prototype.getPendingLength = function () {
+        return this.pendingPromises;
+    };
+
+    /**
+     * Number of queued promises (which are waiting)
+     *
+     * @return {number}
+     */
+    Queue.prototype.getQueueLength = function () {
+        return this.queue.length;
+    };
+
+    /**
+     * @returns {boolean} true if first item removed from queue
+     * @private
+     */
+    Queue.prototype._dequeue = function () {
+        var self = this;
+        if (this.pendingPromises >= this.maxPendingPromises) {
+            return false;
+        }
+
+        // Remove from queue
+        var item = this.queue.shift();
+        if (!item) {
+            if (this.options.onEmpty) {
+                this.options.onEmpty();
+            }
+            return false;
+        }
+
+        try {
+            this.pendingPromises++;
+
+            resolveWith(item.promiseGenerator())
+            // Forward all stuff
+                .then(function (value) {
+                    // It is not pending now
+                    self.pendingPromises--;
+                    // It should pass values
+                    item.resolve(value);
+                    self._dequeue();
+                }, function (err) {
+                    // It is not pending now
+                    self.pendingPromises--;
+                    // It should not mask errors
+                    item.reject(err);
+                    self._dequeue();
+                }, function (message) {
+                    // It should pass notifications
+                    item.notify(message);
+                });
+        } catch (err) {
+            self.pendingPromises--;
+            item.reject(err);
+            self._dequeue();
+
+        }
+
+        return true;
+    };
+
+    return Queue;
+});
+
+},{}],13:[function(_dereq_,module,exports){
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -217,7 +596,7 @@ if (hadRuntime) {
   }
 }
 
-},{"./runtime":10}],10:[function(_dereq_,module,exports){
+},{"./runtime":14}],14:[function(_dereq_,module,exports){
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -940,7 +1319,7 @@ if (hadRuntime) {
   })() || Function("return this")()
 );
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 "use strict";
 
 var metadatas = {};
@@ -1012,7 +1391,7 @@ module.exports = {
   }
 };
 
-},{}],12:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1030,6 +1409,8 @@ var Gp = (typeof window !== "undefined" ? window['Gp'] : typeof global !== "unde
 
 var corslite = _dereq_('@mapbox/corslite');
 
+var Queue = _dereq_('promise-queue');
+
 function latLngToTilePixel(latlng, crs, zoom, tileSize, pixelOrigin) {
   var layerPoint = crs.latLngToPoint(latlng, zoom).floor();
   var tile = layerPoint.divideBy(tileSize).floor();
@@ -1042,7 +1423,9 @@ function latLngToTilePixel(latlng, crs, zoom, tileSize, pixelOrigin) {
 }
 
 module.exports = L.Class.extend({
-  options: {},
+  options: {
+    queueConcurrency: 5
+  },
   initialize: function initialize(apiKey, map, options) {
     this._apiKey = apiKey;
     this._map = map;
@@ -1052,6 +1435,7 @@ module.exports = L.Class.extend({
     };
     this.precision = 8;
     L.Util.setOptions(this, options);
+    this._queue = new Queue(this.options.queueConcurrency, Infinity);
   },
   fetchAltitudes: function fetchAltitudes(latlngs, eventTarget) {
     var _this = this;
@@ -1066,13 +1450,19 @@ module.exports = L.Class.extend({
 
       if (geometry.length === 50) {
         // Launch batch
-        promises.push(_this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+        var g = geometry.splice(0);
+        promises.push(_this._queue.add(function () {
+          return _this._fetchBatchAltitude(g, eventTarget);
+        }));
       }
     });
 
     if (geometry.length > 0) {
       // Launch last batch
-      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+      var g = geometry.splice(0);
+      promises.push(this._queue.add(function () {
+        return _this._fetchBatchAltitude(g, eventTarget);
+      }));
     }
 
     return new Promise(
@@ -1118,41 +1508,50 @@ module.exports = L.Class.extend({
       };
     }());
   },
-  _fetchBatchAltitude: function _fetchBatchAltitude(geometry, eventTarget) {
+  _doFetchBatchAltitude: function _doFetchBatchAltitude(geometry, eventTarget, resolve, reject, retry) {
     var _this2 = this;
 
-    return new Promise(function (resolve, reject) {
-      Gp.Services.getAltitude({
-        apiKey: _this2._apiKey,
-        sampling: geometry.length,
-        positions: geometry,
-        onSuccess: function onSuccess(result) {
-          var elevations = [];
-          result.elevations.forEach(function (val) {
-            elevations.push({
-              lat: val.lat,
-              lng: val.lon,
-              z: val.z
-            });
+    Gp.Services.getAltitude({
+      apiKey: this._apiKey,
+      sampling: geometry.length,
+      positions: geometry,
+      onSuccess: function onSuccess(result) {
+        var elevations = [];
+        result.elevations.forEach(function (val) {
+          elevations.push({
+            lat: val.lat,
+            lng: val.lon,
+            z: val.z
           });
+        });
 
-          if (eventTarget) {
-            eventTarget.fire('TrackStats:fetched', {
-              datatype: 'altitudes',
-              size: elevations.length
-            });
-          }
+        if (eventTarget) {
+          eventTarget.fire('TrackStats:fetched', {
+            datatype: 'altitudes',
+            size: elevations.length
+          });
+        }
 
-          resolve(elevations);
-        },
-        onFailure: function onFailure(error) {
+        resolve(elevations);
+      },
+      onFailure: function onFailure(error) {
+        if (retry) {
+          _this2._doFetchBatchAltitude(geometry, eventTarget, resolve, reject, false);
+        } else {
           reject(new Error(error.message));
         }
-      });
+      }
+    });
+  },
+  _fetchBatchAltitude: function _fetchBatchAltitude(geometry, eventTarget) {
+    var _this3 = this;
+
+    return new Promise(function (resolve, reject) {
+      _this3._doFetchBatchAltitude(geometry, eventTarget, resolve, reject, true);
     });
   },
   fetchSlopes: function fetchSlopes(latlngs, eventTarget) {
-    var _this3 = this;
+    var _this4 = this;
 
     var tiles = {};
     var promises = [];
@@ -1177,7 +1576,9 @@ module.exports = L.Class.extend({
     Object.keys(tiles).forEach(function (x) {
       Object.keys(tiles[x]).forEach(function (y) {
         tiles[x][y].forEach(function (batch) {
-          promises.push(_this3._fetchBatchSlope(x, y, batch, eventTarget));
+          promises.push(_this4._queue.add(function () {
+            return _this4._fetchBatchSlope(x, y, batch, eventTarget);
+          }));
         });
       });
     });
@@ -1292,7 +1693,7 @@ module.exports = L.Class.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8}],13:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8,"promise-queue":10}],17:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1325,7 +1726,7 @@ L.TrackStats = {
 module.exports = L.TrackStats;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":11,"./geoportail":12,"./mapquest":14,"./stats":15,"./stats.polyline":16,"./stats.trackdrawer":17}],14:[function(_dereq_,module,exports){
+},{"./cache":15,"./geoportail":16,"./mapquest":18,"./stats":19,"./stats.polyline":20,"./stats.trackdrawer":21}],18:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1341,8 +1742,12 @@ var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefi
 
 var corslite = _dereq_('@mapbox/corslite');
 
+var Queue = _dereq_('promise-queue');
+
 module.exports = L.Class.extend({
-  options: {},
+  options: {
+    queueConcurrency: 5
+  },
   initialize: function initialize(apiKey, map, options) {
     this._apiKey = apiKey;
     this._map = map;
@@ -1352,6 +1757,7 @@ module.exports = L.Class.extend({
     };
     this.precision = 6;
     L.Util.setOptions(this, options);
+    this._queue = new Queue(this.options.queueConcurrency, Infinity);
   },
   fetchAltitudes: function fetchAltitudes(latlngs, eventTarget) {
     var _this = this;
@@ -1366,13 +1772,19 @@ module.exports = L.Class.extend({
 
       if (geometry.length === 50) {
         // Launch batch
-        promises.push(_this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+        var g = geometry.splice(0);
+        promises.push(_this._queue.add(function () {
+          return _this._fetchBatchAltitude(g, eventTarget);
+        }));
       }
     });
 
     if (geometry.length > 0) {
       // Launch last batch
-      promises.push(this._fetchBatchAltitude(geometry.splice(0), eventTarget));
+      var g = geometry.splice(0);
+      promises.push(this._queue.add(function () {
+        return _this._fetchBatchAltitude(g, eventTarget);
+      }));
     }
 
     return new Promise(
@@ -1505,7 +1917,7 @@ module.exports = L.Class.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8}],15:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8,"promise-queue":10}],19:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1644,7 +2056,7 @@ var stats = L.Class.extend({
 module.exports = stats;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],16:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1867,7 +2279,7 @@ L.LatLng.prototype.getCachedInfos = function getCachedInfos() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":11,"./stats":15,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}],17:[function(_dereq_,module,exports){
+},{"./cache":15,"./stats":19,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}],21:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2044,4 +2456,4 @@ if (L.TrackDrawer !== undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./stats":15,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}]},{},[13]);
+},{"./stats":19,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}]},{},[17]);
