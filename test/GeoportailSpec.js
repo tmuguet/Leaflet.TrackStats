@@ -5,23 +5,26 @@ describe('Geoportail', () => {
   let listener;
 
   beforeEach(() => {
-    const _this = this;
     map = L.map('map', {
       center: L.latLng(44.96777356135154, 6.06822967529297),
       zoom: 13,
     });
     listener = new Listener();
 
-    this.xhr = sinon.useFakeXMLHttpRequest();
+    this.server = sinon.createFakeServer();
+    this.server.respondImmediately = true;
     this.requests = [];
+    this.responses = [];
 
-    this.xhr.onCreate = function (xhr) {
-      _this.requests.push(xhr);
-    };
+    this.server.respondWith((xhr) => {
+      this.requests.push(xhr);
+      [code, headers, content] = this.responses[this.requests.length - 1];
+      xhr.respond(code, headers, content);
+    });
   });
 
   afterEach(async () => {
-    this.xhr.restore();
+    this.server.restore();
     sinon.restore();
     listener.off();
     await map.removeAsPromise();
@@ -39,15 +42,15 @@ describe('Geoportail', () => {
         expect(e.size).to.be.equal(1);
       });
 
-      const promise = gp.fetchAltitudes([latlng], listener);
-      expect(this.requests).to.be.lengthOf(1);
-      this.requests[0].respond(
+      this.responses.push([
         200,
         { 'Content-Type': 'application/xml' },
         '<elevations><elevation><lon>6.070504</lon><lat>44.971296</lat><z>1900.64</z><acc>2.5</acc></elevation></elevations>',
-      );
+      ]);
+      const promise = gp.fetchAltitudes([latlng], listener);
 
       const result = await promise;
+      expect(this.requests).to.be.lengthOf(1);
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(1);
       expect(result[0]).to.deep.equal({ lat: 44.971296, lng: 6.070504, z: 1900.64 });
@@ -86,12 +89,12 @@ describe('Geoportail', () => {
         expect(e.size).to.be.equal(events === 1 ? 50 : 30);
       });
 
+      this.responses.push([200, { 'Content-Type': 'application/xml' }, xmlBatch1]);
+      this.responses.push([200, { 'Content-Type': 'application/xml' }, xmlBatch2]);
       const promise = gp.fetchAltitudes(latlngs, listener);
-      expect(this.requests).to.be.lengthOf(2);
-      this.requests[0].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch1);
-      this.requests[1].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch2);
 
       const result = await promise;
+      expect(this.requests).to.be.lengthOf(2);
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(80);
       expect(result).to.deep.equal(expectedResults);
@@ -99,7 +102,84 @@ describe('Geoportail', () => {
       expect(events).to.be.equal(2);
     });
 
-    it('HTTP error to one batch should reject the promise', async () => {
+    it('Single error should be retried', async () => {
+      const gp = L.TrackStats.geoportail('key', map);
+      const latlng = L.latLng(44.971296, 6.070504);
+
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(1);
+      });
+
+      this.responses.push([
+        403,
+        { 'Content-Type': 'application/xml' },
+        '<ExceptionReport><Exception exceptionCode="MissingParameter">Key does not exist or has expired</Exception></ExceptionReport>',
+      ]);
+      this.responses.push([
+        200,
+        { 'Content-Type': 'application/xml' },
+        '<elevations><elevation><lon>6.070504</lon><lat>44.971296</lat><z>1900.64</z><acc>2.5</acc></elevation></elevations>',
+      ]);
+      const promise = gp.fetchAltitudes([latlng], listener);
+
+      const result = await promise;
+      expect(this.requests).to.be.lengthOf(2);
+      expect(result).to.be.an('array');
+      expect(result).to.be.lengthOf(1);
+      expect(result[0]).to.deep.equal({ lat: 44.971296, lng: 6.070504, z: 1900.64 });
+
+      expect(events).to.be.equal(1);
+    });
+
+    it('Single error should be retried and give correct result', async () => {
+      const gp = L.TrackStats.geoportail('key', map);
+
+      const latlngs = [];
+      const expectedResults = [];
+      let xmlBatch1 = '<elevations>';
+      let xmlBatch2 = '<elevations>';
+
+      for (let i = 0; i < 50; i += 1) {
+        const latlng = L.latLng(44 + i / 10, 6 + i / 10);
+        latlngs.push(latlng);
+        expectedResults.push({ lat: latlng.lat, lng: latlng.lng, z: i });
+        xmlBatch1 += `<elevation><lon>${latlng.lng}</lon><lat>${latlng.lat}</lat><z>${i}</z><acc>0</acc></elevation>`;
+      }
+      xmlBatch1 += '</elevations>';
+
+      for (let i = 0; i < 30; i += 1) {
+        const latlng = L.latLng(45 + i / 10, 5 + i / 10);
+        latlngs.push(latlng);
+        expectedResults.push({ lat: latlng.lat, lng: latlng.lng, z: i });
+        xmlBatch2 += `<elevation><lon>${latlng.lng}</lon><lat>${latlng.lat}</lat><z>${i}</z><acc>0</acc></elevation>`;
+      }
+      xmlBatch2 += '</elevations>';
+
+      let events = 0;
+      listener.on('TrackStats:fetched', (e) => {
+        events += 1;
+        expect(e.datatype).to.be.equal('altitudes');
+        expect(e.size).to.be.equal(events === 1 ? 50 : 30);
+      });
+
+      this.responses.push([200, { 'Content-Type': 'application/xml' }, xmlBatch1]);
+      this.responses.push([500, {}, '']);
+      this.responses.push([200, { 'Content-Type': 'application/xml' }, xmlBatch2]);
+      const promise = gp.fetchAltitudes(latlngs, listener);
+
+      const result = await promise;
+      expect(this.requests).to.be.lengthOf(3);
+      expect(result).to.be.an('array');
+      expect(result).to.be.lengthOf(80);
+      expect(result).to.deep.equal(expectedResults);
+
+      expect(events).to.be.equal(2);
+    });
+
+    it('HTTP error to first batch should reject the promise', async () => {
       const gp = L.TrackStats.geoportail('key', map);
 
       const latlngs = [];
@@ -115,26 +195,31 @@ describe('Geoportail', () => {
         latlngs.push(latlng);
       }
 
-      const promise = gp.fetchAltitudes(latlngs);
-      expect(this.requests).to.be.lengthOf(2);
-      this.requests[0].respond(
+      this.responses.push([
         403,
         { 'Content-Type': 'application/xml' },
         '<ExceptionReport><Exception exceptionCode="MissingParameter">Key does not exist or has expired</Exception></ExceptionReport>',
-      );
-      this.requests[1].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch2);
+      ]);
+      this.responses.push([200, { 'Content-Type': 'application/xml' }, xmlBatch2]);
+      this.responses.push([
+        403,
+        { 'Content-Type': 'application/xml' },
+        '<ExceptionReport><Exception exceptionCode="MissingParameter">Key does not exist or has expired</Exception></ExceptionReport>',
+      ]);
+      const promise = gp.fetchAltitudes(latlngs);
 
       return promise.then(
         (value) => {
           expect(true).to.be.false;
         },
         (reason) => {
+          expect(this.requests).to.be.lengthOf(3);
           expect(reason.message).to.be.equal('The response of the service is empty');
         },
       );
     });
 
-    it('HTTP error to one batch should reject the promise', async () => {
+    it('HTTP error to last batch should reject the promise', async () => {
       const gp = L.TrackStats.geoportail('key', map);
 
       const latlngs = [];
@@ -150,16 +235,17 @@ describe('Geoportail', () => {
         latlngs.push(latlng);
       }
 
+      this.responses.push([200, { 'Content-Type': 'application/xml' }, xmlBatch2]);
+      this.responses.push([500, {}, '']);
+      this.responses.push([500, {}, '']);
       const promise = gp.fetchAltitudes(latlngs);
-      expect(this.requests).to.be.lengthOf(2);
-      this.requests[0].respond(200, { 'Content-Type': 'application/xml' }, xmlBatch2);
-      this.requests[1].respond(500, {}, '');
 
       return promise.then(
         (value) => {
           expect(true).to.be.false;
         },
         (reason) => {
+          expect(this.requests).to.be.lengthOf(3);
           expect(reason.message).to.be.equal('The response of the service is empty');
         },
       );
@@ -178,9 +264,7 @@ describe('Geoportail', () => {
         expect(e.size).to.be.equal(1);
       });
 
-      const promise = gp.fetchSlopes([latlng], listener);
-      expect(this.requests).to.be.lengthOf(1);
-      this.requests[0].respond(
+      this.responses.push([
         200,
         { 'Content-Type': 'application/json' },
         JSON.stringify({
@@ -194,9 +278,11 @@ describe('Geoportail', () => {
             },
           ],
         }),
-      );
+      ]);
+      const promise = gp.fetchSlopes([latlng], listener);
 
       const result = await promise;
+      expect(this.requests).to.be.lengthOf(1);
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(1);
       expect(result[0]).to.deep.equal({ lat: 44.971296, lng: 6.070504, slope: 40 });
@@ -835,12 +921,12 @@ describe('Geoportail', () => {
         expect(e.size).to.be.equal(events === 1 ? jsonBatch1.length : jsonBatch2.length);
       });
 
+      this.responses.push([200, { 'Content-Type': 'application/json' }, JSON.stringify({ results: jsonBatch1 })]);
+      this.responses.push([200, { 'Content-Type': 'application/json' }, JSON.stringify({ results: jsonBatch2 })]);
       const promise = gp.fetchSlopes(latlngs, listener);
-      expect(this.requests).to.be.lengthOf(2);
-      this.requests[0].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({ results: jsonBatch1 }));
-      this.requests[1].respond(200, { 'Content-Type': 'application/json' }, JSON.stringify({ results: jsonBatch2 }));
 
       const result = await promise;
+      expect(this.requests).to.be.lengthOf(2);
       expect(result).to.be.an('array');
       expect(result).to.be.lengthOf(68);
       expect(result).to.deep.equal(expectedResults);
@@ -922,16 +1008,16 @@ describe('Geoportail', () => {
         L.latLng(44.959211, 6.045377),
       ];
 
+      this.responses.push([500, { 'Content-Type': 'application/json' }, '{"error": "Unknown error"}']);
+      this.responses.push([200, { 'Content-Type': 'application/json' }, '{"results": []}']);
       const promise = gp.fetchSlopes(latlngs);
-      expect(this.requests).to.be.lengthOf(2);
-      this.requests[0].respond(500, { 'Content-Type': 'application/json' }, '{"error": "Unknown error"}');
-      this.requests[1].respond(200, { 'Content-Type': 'application/json' }, '{"results": []}');
 
       return promise.then(
         (value) => {
           expect(true).to.be.false;
         },
         (reason) => {
+          expect(this.requests).to.be.lengthOf(2);
           expect(reason.message).to.be.equal('Unknown error');
         },
       );

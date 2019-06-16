@@ -59,31 +59,39 @@ module.exports = L.Class.extend({
     });
   },
 
+  _doFetchBatchAltitude(geometry, eventTarget, resolve, reject, retry) {
+    Gp.Services.getAltitude({
+      apiKey: this._apiKey,
+      sampling: geometry.length,
+      positions: geometry,
+      onSuccess: (result) => {
+        const elevations = [];
+        result.elevations.forEach((val) => {
+          elevations.push({ lat: val.lat, lng: val.lon, z: val.z });
+        });
+
+        if (eventTarget) {
+          eventTarget.fire('TrackStats:fetched', {
+            datatype: 'altitudes',
+            size: elevations.length,
+          });
+        }
+
+        resolve(elevations);
+      },
+      onFailure: (error) => {
+        if (retry) {
+          this._doFetchBatchAltitude(geometry, eventTarget, resolve, reject, false);
+        } else {
+          reject(new Error(error.message));
+        }
+      },
+    });
+  },
+
   _fetchBatchAltitude(geometry, eventTarget) {
     return new Promise((resolve, reject) => {
-      Gp.Services.getAltitude({
-        apiKey: this._apiKey,
-        sampling: geometry.length,
-        positions: geometry,
-        onSuccess: (result) => {
-          const elevations = [];
-          result.elevations.forEach((val) => {
-            elevations.push({ lat: val.lat, lng: val.lon, z: val.z });
-          });
-
-          if (eventTarget) {
-            eventTarget.fire('TrackStats:fetched', {
-              datatype: 'altitudes',
-              size: elevations.length,
-            });
-          }
-
-          resolve(elevations);
-        },
-        onFailure: (error) => {
-          reject(new Error(error.message));
-        },
-      });
+      this._doFetchBatchAltitude(geometry, eventTarget, resolve, reject, true);
     });
   },
 
