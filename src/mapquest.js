@@ -4,7 +4,7 @@ const Queue = require('promise-queue');
 
 module.exports = L.Class.extend({
   options: {
-    queueConcurrency: 3,
+    queueConcurrency: 5,
   },
 
   initialize(apiKey, map, options) {

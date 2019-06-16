@@ -581,7 +581,7 @@ function latLngToTilePixel(latlng, crs, zoom, tileSize, pixelOrigin) {
 
 module.exports = L.Class.extend({
   options: {
-    queueConcurrency: 3
+    queueConcurrency: 5
   },
   initialize: function initialize(apiKey, map, options) {
     this._apiKey = apiKey;
@@ -907,7 +907,7 @@ var Queue = _dereq_('promise-queue');
 
 module.exports = L.Class.extend({
   options: {
-    queueConcurrency: 3
+    queueConcurrency: 5
   },
   initialize: function initialize(apiKey, map, options) {
     this._apiKey = apiKey;
