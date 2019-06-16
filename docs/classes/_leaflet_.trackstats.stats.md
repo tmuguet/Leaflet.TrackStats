@@ -156,22 +156,22 @@ ___
 
 ###  getSlopeTerrainMax
 
-▸ **getSlopeTerrainMax**(): `number` | `undefined`
+▸ **getSlopeTerrainMax**(): `number` \| `undefined`
 
 Gets the maximum slope on the terrain
 
-**Returns:** `number` | `undefined`
+**Returns:** `number` \| `undefined`
 
 ___
 <a id="getslopeterrainmin"></a>
 
 ###  getSlopeTerrainMin
 
-▸ **getSlopeTerrainMin**(): `number` | `undefined`
+▸ **getSlopeTerrainMin**(): `number` \| `undefined`
 
 Gets the minimum slope on the terrain
 
-**Returns:** `number` | `undefined`
+**Returns:** `number` \| `undefined`
 
 ___
 

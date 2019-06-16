@@ -3,6 +3,7 @@
 # Class: Track
 
 Extends TrackDrawer.Track if available
+
 *__fires__*: TrackDrawer:statsdone Fired when computation is done
 
 *__fires__*: TrackDrawer:statsfailed Fired if computation has failed

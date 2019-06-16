@@ -68,6 +68,7 @@ ___
 ▸ **fetchSlopes**(latlngs: *`LatLng`[]*, eventTarget?: *`Evented`*): `Promise`<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>
 
 Unsupported
+
 *__throws__*: Error
 
 **Parameters:**
