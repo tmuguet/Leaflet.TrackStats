@@ -51,7 +51,7 @@ module.exports = _asyncToGenerator;
 },{}],3:[function(_dereq_,module,exports){
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
-    default: obj
+    "default": obj
   };
 }
 
@@ -565,46 +565,7 @@ module.exports = process.env.PROMISE_QUEUE_COVERAGE ?
  * LICENSE file in the root directory of this source tree.
  */
 
-// This method of obtaining a reference to the global object needs to be
-// kept identical to the way it is obtained in runtime.js
-var g = (function() {
-  return this || (typeof self === "object" && self);
-})() || Function("return this")();
-
-// Use `getOwnPropertyNames` because not all browsers support calling
-// `hasOwnProperty` on the global `self` object in a worker. See #183.
-var hadRuntime = g.regeneratorRuntime &&
-  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
-
-// Save the old regeneratorRuntime in case it needs to be restored later.
-var oldRuntime = hadRuntime && g.regeneratorRuntime;
-
-// Force reevalutation of runtime.js.
-g.regeneratorRuntime = undefined;
-
-module.exports = _dereq_("./runtime");
-
-if (hadRuntime) {
-  // Restore the original runtime.
-  g.regeneratorRuntime = oldRuntime;
-} else {
-  // Remove the global property added by runtime.js.
-  try {
-    delete g.regeneratorRuntime;
-  } catch(e) {
-    g.regeneratorRuntime = undefined;
-  }
-}
-
-},{"./runtime":14}],14:[function(_dereq_,module,exports){
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-!(function(global) {
+var runtime = (function (exports) {
   "use strict";
 
   var Op = Object.prototype;
@@ -614,23 +575,6 @@ if (hadRuntime) {
   var iteratorSymbol = $Symbol.iterator || "@@iterator";
   var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
   var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  var inModule = typeof module === "object";
-  var runtime = global.regeneratorRuntime;
-  if (runtime) {
-    if (inModule) {
-      // If regeneratorRuntime is defined globally and we're in a module,
-      // make the exports object identical to regeneratorRuntime.
-      module.exports = runtime;
-    }
-    // Don't bother evaluating the rest of this file if the runtime was
-    // already defined globally.
-    return;
-  }
-
-  // Define the runtime globally (as expected by generated code) as either
-  // module.exports (if we're in a module) or a new, empty object.
-  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
 
   function wrap(innerFn, outerFn, self, tryLocsList) {
     // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
@@ -644,7 +588,7 @@ if (hadRuntime) {
 
     return generator;
   }
-  runtime.wrap = wrap;
+  exports.wrap = wrap;
 
   // Try/catch helper to minimize deoptimizations. Returns a completion
   // record like context.tryEntries[i].completion. This interface could
@@ -715,7 +659,7 @@ if (hadRuntime) {
     });
   }
 
-  runtime.isGeneratorFunction = function(genFun) {
+  exports.isGeneratorFunction = function(genFun) {
     var ctor = typeof genFun === "function" && genFun.constructor;
     return ctor
       ? ctor === GeneratorFunction ||
@@ -725,7 +669,7 @@ if (hadRuntime) {
       : false;
   };
 
-  runtime.mark = function(genFun) {
+  exports.mark = function(genFun) {
     if (Object.setPrototypeOf) {
       Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
     } else {
@@ -742,7 +686,7 @@ if (hadRuntime) {
   // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
   // `hasOwn.call(value, "__await")` to determine if the yielded value is
   // meant to be awaited.
-  runtime.awrap = function(arg) {
+  exports.awrap = function(arg) {
     return { __await: arg };
   };
 
@@ -817,17 +761,17 @@ if (hadRuntime) {
   AsyncIterator.prototype[asyncIteratorSymbol] = function () {
     return this;
   };
-  runtime.AsyncIterator = AsyncIterator;
+  exports.AsyncIterator = AsyncIterator;
 
   // Note that simple async functions are implemented on top of
   // AsyncIterator objects; they just return a Promise for the value of
   // the final result produced by the iterator.
-  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+  exports.async = function(innerFn, outerFn, self, tryLocsList) {
     var iter = new AsyncIterator(
       wrap(innerFn, outerFn, self, tryLocsList)
     );
 
-    return runtime.isGeneratorFunction(outerFn)
+    return exports.isGeneratorFunction(outerFn)
       ? iter // If outerFn is a generator, return the full iterator.
       : iter.next().then(function(result) {
           return result.done ? result.value : iter.next();
@@ -924,7 +868,8 @@ if (hadRuntime) {
       context.delegate = null;
 
       if (context.method === "throw") {
-        if (delegate.iterator.return) {
+        // Note: ["return"] must be used for ES3 parsing compatibility.
+        if (delegate.iterator["return"]) {
           // If the delegate iterator has a return method, give it a
           // chance to clean up.
           context.method = "return";
@@ -1044,7 +989,7 @@ if (hadRuntime) {
     this.reset(true);
   }
 
-  runtime.keys = function(object) {
+  exports.keys = function(object) {
     var keys = [];
     for (var key in object) {
       keys.push(key);
@@ -1105,7 +1050,7 @@ if (hadRuntime) {
     // Return an iterator with no values.
     return { next: doneResult };
   }
-  runtime.values = values;
+  exports.values = values;
 
   function doneResult() {
     return { value: undefined, done: true };
@@ -1310,16 +1255,37 @@ if (hadRuntime) {
       return ContinueSentinel;
     }
   };
-})(
-  // In sloppy mode, unbound `this` refers to the global object, fallback to
-  // Function constructor if we're in global strict mode. That is sadly a form
-  // of indirect eval which violates Content Security Policy.
-  (function() {
-    return this || (typeof self === "object" && self);
-  })() || Function("return this")()
-);
 
-},{}],15:[function(_dereq_,module,exports){
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+  typeof module === "object" ? module.exports : {}
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  Function("r", "regeneratorRuntime = r")(runtime);
+}
+
+},{}],14:[function(_dereq_,module,exports){
 "use strict";
 
 var metadatas = {};
@@ -1391,7 +1357,7 @@ module.exports = {
   }
 };
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1468,11 +1434,11 @@ module.exports = L.Class.extend({
     return new Promise(
     /*#__PURE__*/
     function () {
-      var _ref = (0, _asyncToGenerator2.default)(
+      var _ref = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator.default.mark(function _callee(resolve, reject) {
+      _regenerator["default"].mark(function _callee(resolve, reject) {
         var data, results;
-        return _regenerator.default.wrap(function _callee$(_context) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -1484,7 +1450,7 @@ module.exports = L.Class.extend({
                 data = _context.sent;
                 results = [];
                 data.forEach(function (x) {
-                  return results.push.apply(results, (0, _toConsumableArray2.default)(x));
+                  return results.push.apply(results, (0, _toConsumableArray2["default"])(x));
                 });
                 resolve(results);
                 _context.next = 12;
@@ -1500,7 +1466,7 @@ module.exports = L.Class.extend({
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 9]]);
+        }, _callee, null, [[0, 9]]);
       }));
 
       return function (_x, _x2) {
@@ -1585,11 +1551,11 @@ module.exports = L.Class.extend({
     return new Promise(
     /*#__PURE__*/
     function () {
-      var _ref2 = (0, _asyncToGenerator2.default)(
+      var _ref2 = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator.default.mark(function _callee2(resolve, reject) {
+      _regenerator["default"].mark(function _callee2(resolve, reject) {
         var data, results;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -1601,7 +1567,7 @@ module.exports = L.Class.extend({
                 data = _context2.sent;
                 results = [];
                 data.forEach(function (x) {
-                  return results.push.apply(results, (0, _toConsumableArray2.default)(x));
+                  return results.push.apply(results, (0, _toConsumableArray2["default"])(x));
                 });
                 resolve(results);
                 _context2.next = 12;
@@ -1617,7 +1583,7 @@ module.exports = L.Class.extend({
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 9]]);
+        }, _callee2, null, [[0, 9]]);
       }));
 
       return function (_x3, _x4) {
@@ -1693,7 +1659,7 @@ module.exports = L.Class.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8,"promise-queue":10}],17:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8,"promise-queue":10}],16:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1726,7 +1692,7 @@ L.TrackStats = {
 module.exports = L.TrackStats;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":15,"./geoportail":16,"./mapquest":18,"./stats":19,"./stats.polyline":20,"./stats.trackdrawer":21}],18:[function(_dereq_,module,exports){
+},{"./cache":14,"./geoportail":15,"./mapquest":17,"./stats":18,"./stats.polyline":19,"./stats.trackdrawer":20}],17:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1790,11 +1756,11 @@ module.exports = L.Class.extend({
     return new Promise(
     /*#__PURE__*/
     function () {
-      var _ref = (0, _asyncToGenerator2.default)(
+      var _ref = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator.default.mark(function _callee(resolve, reject) {
+      _regenerator["default"].mark(function _callee(resolve, reject) {
         var data, results;
-        return _regenerator.default.wrap(function _callee$(_context) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -1806,7 +1772,7 @@ module.exports = L.Class.extend({
                 data = _context.sent;
                 results = [];
                 data.forEach(function (x) {
-                  return results.push.apply(results, (0, _toConsumableArray2.default)(x));
+                  return results.push.apply(results, (0, _toConsumableArray2["default"])(x));
                 });
                 resolve(results);
                 _context.next = 12;
@@ -1822,7 +1788,7 @@ module.exports = L.Class.extend({
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 9]]);
+        }, _callee, null, [[0, 9]]);
       }));
 
       return function (_x, _x2) {
@@ -1892,10 +1858,10 @@ module.exports = L.Class.extend({
     return new Promise(
     /*#__PURE__*/
     function () {
-      var _ref2 = (0, _asyncToGenerator2.default)(
+      var _ref2 = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator.default.mark(function _callee2(resolve, reject) {
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+      _regenerator["default"].mark(function _callee2(resolve, reject) {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -1906,7 +1872,7 @@ module.exports = L.Class.extend({
                 return _context2.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee2);
       }));
 
       return function (_x3, _x4) {
@@ -1917,7 +1883,7 @@ module.exports = L.Class.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8,"promise-queue":10}],19:[function(_dereq_,module,exports){
+},{"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8,"promise-queue":10}],18:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2056,7 +2022,7 @@ var stats = L.Class.extend({
 module.exports = stats;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2122,11 +2088,11 @@ L.Polyline.include({
     return new Promise(
     /*#__PURE__*/
     function () {
-      var _ref = (0, _asyncToGenerator2.default)(
+      var _ref = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator.default.mark(function _callee(resolve, reject) {
+      _regenerator["default"].mark(function _callee(resolve, reject) {
         var elevations;
-        return _regenerator.default.wrap(function _callee$(_context) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -2168,7 +2134,7 @@ L.Polyline.include({
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 10]]);
+        }, _callee, null, [[0, 10]]);
       }));
 
       return function (_x, _x2) {
@@ -2198,11 +2164,11 @@ L.Polyline.include({
     return new Promise(
     /*#__PURE__*/
     function () {
-      var _ref2 = (0, _asyncToGenerator2.default)(
+      var _ref2 = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator.default.mark(function _callee2(resolve, reject) {
+      _regenerator["default"].mark(function _callee2(resolve, reject) {
         var slopes;
-        return _regenerator.default.wrap(function _callee2$(_context2) {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -2244,7 +2210,7 @@ L.Polyline.include({
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 10]]);
+        }, _callee2, null, [[0, 10]]);
       }));
 
       return function (_x3, _x4) {
@@ -2279,7 +2245,7 @@ L.LatLng.prototype.getCachedInfos = function getCachedInfos() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":15,"./stats":19,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}],21:[function(_dereq_,module,exports){
+},{"./cache":14,"./stats":18,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}],20:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2311,7 +2277,7 @@ if (L.TrackDrawer !== undefined) {
         });
       });
       this.on('TrackDrawer:done', function () {
-        _this._finalizeRoute(_this.options.fetcher).catch(function (e) {
+        _this._finalizeRoute(_this.options.fetcher)["catch"](function (e) {
           _this._i -= 1;
           if (_this._fireEvents) _this.fire('TrackDrawer:statsfailed', {
             message: e.message
@@ -2344,11 +2310,11 @@ if (L.TrackDrawer !== undefined) {
       return new Promise(
       /*#__PURE__*/
       function () {
-        var _ref = (0, _asyncToGenerator2.default)(
+        var _ref = (0, _asyncToGenerator2["default"])(
         /*#__PURE__*/
-        _regenerator.default.mark(function _callee(resolve, reject) {
+        _regenerator["default"].mark(function _callee(resolve, reject) {
           var promises;
-          return _regenerator.default.wrap(function _callee$(_context) {
+          return _regenerator["default"].wrap(function _callee$(_context) {
             while (1) {
               switch (_context.prev = _context.next) {
                 case 0:
@@ -2384,7 +2350,7 @@ if (L.TrackDrawer !== undefined) {
                   return _context.stop();
               }
             }
-          }, _callee, this, [[0, 10]]);
+          }, _callee, null, [[0, 10]]);
         }));
 
         return function (_x, _x2) {
@@ -2456,4 +2422,4 @@ if (L.TrackDrawer !== undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./stats":19,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}]},{},[17]);
+},{"./stats":18,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}]},{},[16]);

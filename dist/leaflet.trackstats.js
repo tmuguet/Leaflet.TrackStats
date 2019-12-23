@@ -657,7 +657,7 @@ module.exports = L.Class.extend({
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 9]]);
+        }, _callee, null, [[0, 9]]);
       }));
 
       return function (_x, _x2) {
@@ -774,7 +774,7 @@ module.exports = L.Class.extend({
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 9]]);
+        }, _callee2, null, [[0, 9]]);
       }));
 
       return function (_x3, _x4) {
@@ -983,7 +983,7 @@ module.exports = L.Class.extend({
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 9]]);
+        }, _callee, null, [[0, 9]]);
       }));
 
       return function (_x, _x2) {
@@ -1067,7 +1067,7 @@ module.exports = L.Class.extend({
                 return _context2.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee2);
       }));
 
       return function (_x3, _x4) {
@@ -1327,7 +1327,7 @@ L.Polyline.include({
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 10]]);
+        }, _callee, null, [[0, 10]]);
       }));
 
       return function (_x, _x2) {
@@ -1403,7 +1403,7 @@ L.Polyline.include({
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 10]]);
+        }, _callee2, null, [[0, 10]]);
       }));
 
       return function (_x3, _x4) {
@@ -1468,7 +1468,7 @@ if (L.TrackDrawer !== undefined) {
         });
       });
       this.on('TrackDrawer:done', function () {
-        _this._finalizeRoute(_this.options.fetcher).catch(function (e) {
+        _this._finalizeRoute(_this.options.fetcher)["catch"](function (e) {
           _this._i -= 1;
           if (_this._fireEvents) _this.fire('TrackDrawer:statsfailed', {
             message: e.message
@@ -1541,7 +1541,7 @@ if (L.TrackDrawer !== undefined) {
                   return _context.stop();
               }
             }
-          }, _callee, this, [[0, 10]]);
+          }, _callee, null, [[0, 10]]);
         }));
 
         return function (_x, _x2) {
