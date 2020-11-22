@@ -5,7 +5,6 @@ describe('MapQuest', () => {
   let listener;
 
   beforeEach(() => {
-    const _this = this;
     map = L.map('map', {
       center: L.latLng(44.96777356135154, 6.06822967529297),
       zoom: 13,
@@ -15,8 +14,8 @@ describe('MapQuest', () => {
     this.xhr = sinon.useFakeXMLHttpRequest();
     this.requests = [];
 
-    this.xhr.onCreate = function (xhr) {
-      _this.requests.push(xhr);
+    this.xhr.onCreate = (xhr) => {
+      this.requests.push(xhr);
     };
   });
 
@@ -189,7 +188,7 @@ describe('MapQuest', () => {
       );
 
       return promise.then(
-        (value) => {
+        () => {
           expect(true).to.be.false;
         },
         (reason) => {
@@ -215,7 +214,7 @@ describe('MapQuest', () => {
       expect(this.requests).to.be.lengthOf(0);
       expect(events).to.be.equal(0);
       return promise.then(
-        (value) => {
+        () => {
           expect(true).to.be.false;
         },
         (reason) => {

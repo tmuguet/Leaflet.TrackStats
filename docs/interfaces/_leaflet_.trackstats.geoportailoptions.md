@@ -1,12 +1,9 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / GeoportailOptions
 
 # Interface: GeoportailOptions
 
 ## Hierarchy
 
-**GeoportailOptions**
-
-## Index
-
----
-
+* **GeoportailOptions**

@@ -1,10 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [Geoportail](../classes/_leaflet_.trackstats.geoportail.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / Geoportail
 
 # Class: Geoportail
 
 ## Hierarchy
 
-**Geoportail**
+* **Geoportail**
 
 ## Implements
 
@@ -21,60 +23,52 @@
 * [fetchAltitudes](_leaflet_.trackstats.geoportail.md#fetchaltitudes)
 * [fetchSlopes](_leaflet_.trackstats.geoportail.md#fetchslopes)
 
----
-
 ## Constructors
 
-<a id="constructor"></a>
+### constructor
 
-###  constructor
+\+ **new Geoportail**(`apiKey`: String, `map`: Map, `options?`: [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md)): [Geoportail](_leaflet_.trackstats.geoportail.md)
 
-⊕ **new Geoportail**(apiKey: *`String`*, map: *`Map`*, options?: *[GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md)*): [Geoportail](_leaflet_.trackstats.geoportail.md)
+#### Parameters:
 
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| apiKey | `String` |
-| map | `Map` |
-| `Optional` options | [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md) |
+Name | Type |
+------ | ------ |
+`apiKey` | String |
+`map` | Map |
+`options?` | [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md) |
 
 **Returns:** [Geoportail](_leaflet_.trackstats.geoportail.md)
 
-___
-
 ## Methods
 
-<a id="fetchaltitudes"></a>
+### fetchAltitudes
 
-###  fetchAltitudes
+▸ **fetchAltitudes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]>
 
-▸ **fetchAltitudes**(latlngs: *`LatLng`[]*, eventTarget?: *`Evented`*): `Promise`<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]>
+*Implementation of [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md)*
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| latlngs | `LatLng`[] |
-| `Optional` eventTarget | `Evented` |
+Name | Type |
+------ | ------ |
+`latlngs` | LatLng[] |
+`eventTarget?` | Evented |
 
-**Returns:** `Promise`<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]>
-
-___
-<a id="fetchslopes"></a>
-
-###  fetchSlopes
-
-▸ **fetchSlopes**(latlngs: *`LatLng`[]*, eventTarget?: *`Evented`*): `Promise`<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>
-
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| latlngs | `LatLng`[] |
-| `Optional` eventTarget | `Evented` |
-
-**Returns:** `Promise`<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>
+**Returns:** Promise\<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]>
 
 ___
 
+### fetchSlopes
+
+▸ **fetchSlopes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>
+
+*Implementation of [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md)*
+
+#### Parameters:
+
+Name | Type |
+------ | ------ |
+`latlngs` | LatLng[] |
+`eventTarget?` | Evented |
+
+**Returns:** Promise\<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>

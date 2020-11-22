@@ -38,20 +38,17 @@ module.exports = L.Class.extend({
       promises.push(this._queue.add(() => this._fetchBatchAltitude(g, eventTarget)));
     }
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const data = await Promise.all(promises);
+    return new Promise((resolve, reject) => {
+      Promise.all(promises).then((data) => {
         const results = [];
-        data.forEach(x => results.push(...x));
+        data.forEach((x) => results.push(...x));
         resolve(results);
-      } catch (e) {
-        reject(e);
-      }
+      }).catch((e) => reject(e));
     });
   },
 
   _fetchBatchAltitude(geometry, eventTarget) {
-    const latlngs = geometry.map(x => `${x.lat},${x.lon}`).join(',');
+    const latlngs = geometry.map((x) => `${x.lat},${x.lon}`).join(',');
     const url = 'https://open.mapquestapi.com/elevation/v1/profile?shapeFormat=raw&'
       + `latLngCollection=${latlngs}&key=${this._apiKey}`;
 
@@ -110,7 +107,7 @@ module.exports = L.Class.extend({
   },
 
   fetchSlopes() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((_resolve, reject) => {
       reject(new Error('Unsupported'));
     });
   },

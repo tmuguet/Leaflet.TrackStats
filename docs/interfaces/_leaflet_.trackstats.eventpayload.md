@@ -1,10 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [EventPayload](../interfaces/_leaflet_.trackstats.eventpayload.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / EventPayload
 
 # Interface: EventPayload
 
 ## Hierarchy
 
-**EventPayload**
+* **EventPayload**
 
 ## Index
 
@@ -13,22 +15,14 @@
 * [datatype](_leaflet_.trackstats.eventpayload.md#datatype)
 * [size](_leaflet_.trackstats.eventpayload.md#size)
 
----
-
 ## Properties
 
-<a id="datatype"></a>
+### datatype
 
-###  datatype
-
-**● datatype**: *`String`*
-
-___
-<a id="size"></a>
-
-###  size
-
-**● size**: *`number`*
+•  **datatype**: String
 
 ___
 
+### size
+
+•  **size**: number

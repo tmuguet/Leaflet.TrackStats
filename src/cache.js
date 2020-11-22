@@ -69,7 +69,7 @@ module.exports = {
   },
 
   clear() {
-    Object.keys(metadatas).forEach(x => delete metadatas[x]);
+    Object.keys(metadatas).forEach((x) => delete metadatas[x]);
     return this;
   },
 };

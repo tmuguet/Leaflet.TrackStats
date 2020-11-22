@@ -17,8 +17,9 @@ module.exports = function (config) {
       'node_modules/jquery/dist/jquery.min.js',
       'node_modules/leaflet/dist/leaflet.js',
       'node_modules/geoportal-access-lib/dist/GpServices.js',
-      'node_modules/@babel/polyfill/dist/polyfill.min.js',
-      'dist/leaflet.trackstats.js',
+      'node_modules/@mapbox/corslite/corslite.js',
+      'node_modules/promise-queue/lib/index.js',
+      'dist/leaflet.trackstats.umd.js',
       'test/*.js',
       'test/**/*Spec.js',
     ],
@@ -26,7 +27,7 @@ module.exports = function (config) {
     reporters: ['progress', 'coverage'],
 
     preprocessors: {
-      'dist/leaflet.trackstats.js': ['coverage'],
+      'dist/leaflet.trackstats.umd.js': ['coverage'],
     },
 
     coverageReporter: {

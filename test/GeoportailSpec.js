@@ -18,7 +18,7 @@ describe('Geoportail', () => {
 
     this.server.respondWith((xhr) => {
       this.requests.push(xhr);
-      [code, headers, content] = this.responses[this.requests.length - 1];
+      const [code, headers, content] = this.responses[this.requests.length - 1];
       xhr.respond(code, headers, content);
     });
   });
@@ -42,11 +42,13 @@ describe('Geoportail', () => {
         expect(e.size).to.be.equal(1);
       });
 
+      /* eslint-disable max-len */
       this.responses.push([
         200,
         { 'Content-Type': 'application/xml' },
         '<elevations><elevation><lon>6.070504</lon><lat>44.971296</lat><z>1900.64</z><acc>2.5</acc></elevation></elevations>',
       ]);
+      /* eslint-enable max-len */
       const promise = gp.fetchAltitudes([latlng], listener);
 
       const result = await promise;
@@ -66,6 +68,7 @@ describe('Geoportail', () => {
       let xmlBatch1 = '<elevations>';
       let xmlBatch2 = '<elevations>';
 
+      /* eslint-disable max-len */
       for (let i = 0; i < 50; i += 1) {
         const latlng = L.latLng(44 + i / 10, 6 + i / 10);
         latlngs.push(latlng);
@@ -81,6 +84,7 @@ describe('Geoportail', () => {
         xmlBatch2 += `<elevation><lon>${latlng.lng}</lon><lat>${latlng.lat}</lat><z>${i}</z><acc>0</acc></elevation>`;
       }
       xmlBatch2 += '</elevations>';
+      /* eslint-enable max-len */
 
       let events = 0;
       listener.on('TrackStats:fetched', (e) => {
@@ -113,6 +117,7 @@ describe('Geoportail', () => {
         expect(e.size).to.be.equal(1);
       });
 
+      /* eslint-disable max-len */
       this.responses.push([
         403,
         { 'Content-Type': 'application/xml' },
@@ -123,6 +128,7 @@ describe('Geoportail', () => {
         { 'Content-Type': 'application/xml' },
         '<elevations><elevation><lon>6.070504</lon><lat>44.971296</lat><z>1900.64</z><acc>2.5</acc></elevation></elevations>',
       ]);
+      /* eslint-enable max-len */
       const promise = gp.fetchAltitudes([latlng], listener);
 
       const result = await promise;
@@ -142,6 +148,7 @@ describe('Geoportail', () => {
       let xmlBatch1 = '<elevations>';
       let xmlBatch2 = '<elevations>';
 
+      /* eslint-disable max-len */
       for (let i = 0; i < 50; i += 1) {
         const latlng = L.latLng(44 + i / 10, 6 + i / 10);
         latlngs.push(latlng);
@@ -157,6 +164,7 @@ describe('Geoportail', () => {
         xmlBatch2 += `<elevation><lon>${latlng.lng}</lon><lat>${latlng.lat}</lat><z>${i}</z><acc>0</acc></elevation>`;
       }
       xmlBatch2 += '</elevations>';
+      /* eslint-enable max-len */
 
       let events = 0;
       listener.on('TrackStats:fetched', (e) => {
@@ -195,6 +203,7 @@ describe('Geoportail', () => {
         latlngs.push(latlng);
       }
 
+      /* eslint-disable max-len */
       this.responses.push([
         403,
         { 'Content-Type': 'application/xml' },
@@ -206,10 +215,11 @@ describe('Geoportail', () => {
         { 'Content-Type': 'application/xml' },
         '<ExceptionReport><Exception exceptionCode="MissingParameter">Key does not exist or has expired</Exception></ExceptionReport>',
       ]);
+      /* eslint-enable max-len */
       const promise = gp.fetchAltitudes(latlngs);
 
       return promise.then(
-        (value) => {
+        () => {
           expect(true).to.be.false;
         },
         (reason) => {
@@ -241,7 +251,7 @@ describe('Geoportail', () => {
       const promise = gp.fetchAltitudes(latlngs);
 
       return promise.then(
-        (value) => {
+        () => {
           expect(true).to.be.false;
         },
         (reason) => {
@@ -1013,7 +1023,7 @@ describe('Geoportail', () => {
       const promise = gp.fetchSlopes(latlngs);
 
       return promise.then(
-        (value) => {
+        () => {
           expect(true).to.be.false;
         },
         (reason) => {

@@ -1,6 +1,8 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [cache](../modules/_leaflet_.trackstats.cache.md)
+**[Leaflet.TrackDrawer](../README.md)**
 
-# Module: cache
+> [Globals](../README.md) / ["leaflet"](_leaflet_.md) / [TrackStats](_leaflet_.trackstats.md) / cache
+
+# Namespace: cache
 
 ## Index
 
@@ -21,177 +23,161 @@
 * [hasZ](_leaflet_.trackstats.cache.md#hasz)
 * [setPrecision](_leaflet_.trackstats.cache.md#setprecision)
 
----
-
 ## Functions
 
-<a id="add"></a>
+### add
 
-###  add
-
-▸ **add**(t: *[Type](../enums/_leaflet_.trackstats.cache.type.md)*, coords: *`LatLng`*): `void`
+▸ **add**(`t`: [Type](../enums/_leaflet_.trackstats.cache.type.md), `coords`: LatLng): void
 
 Adds a value in the cache.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| t | [Type](../enums/_leaflet_.trackstats.cache.type.md) |  Type of data to add. Property \`t\` of \`coords\` must be defined |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`t` | [Type](../enums/_leaflet_.trackstats.cache.type.md) | Type of data to add. Property `t` of `coords` must be defined |
+`coords` | LatLng | Data  |
 
-**Returns:** `void`
+**Returns:** void
 
 ___
-<a id="addslope"></a>
 
-###  addSlope
+### addSlope
 
-▸ **addSlope**(coords: *`LatLng`*): `void`
+▸ **addSlope**(`coords`: LatLng): void
 
 Shorthand for `add('slope', coords)`
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`coords` | LatLng | Data  |
 
-**Returns:** `void`
+**Returns:** void
 
 ___
-<a id="addz"></a>
 
-###  addZ
+### addZ
 
-▸ **addZ**(coords: *`LatLng`*): `void`
+▸ **addZ**(`coords`: LatLng): void
 
 Shorthand for `add('z', coords)`
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`coords` | LatLng | Data  |
 
-**Returns:** `void`
+**Returns:** void
 
 ___
-<a id="clear"></a>
 
-###  clear
+### clear
 
-▸ **clear**(): `void`
+▸ **clear**(): void
 
 Clears the cache
 
-**Returns:** `void`
+**Returns:** void
 
 ___
-<a id="get"></a>
 
-###  get
+### get
 
-▸ **get**(t: *[Type](../enums/_leaflet_.trackstats.cache.type.md)*, coords: *`LatLng`*): `number`
+▸ **get**(`t`: [Type](../enums/_leaflet_.trackstats.cache.type.md), `coords`: LatLng): number
 
 Get a value from the cache.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| t | [Type](../enums/_leaflet_.trackstats.cache.type.md) |  Type of data to get. |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`t` | [Type](../enums/_leaflet_.trackstats.cache.type.md) | Type of data to get. |
+`coords` | LatLng | Data  |
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getall"></a>
 
-###  getAll
+### getAll
 
-▸ **getAll**(coords: *`LatLng`*): [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
+▸ **getAll**(`coords`: LatLng): [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
 
 Gets all data cached for these coordinates
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`coords` | LatLng | Data  |
 
 **Returns:** [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
 
 ___
-<a id="has"></a>
 
-###  has
+### has
 
-▸ **has**(t: *[Type](../enums/_leaflet_.trackstats.cache.type.md)*, coords: *`LatLng`*): `boolean`
+▸ **has**(`t`: [Type](../enums/_leaflet_.trackstats.cache.type.md), `coords`: LatLng): boolean
 
 Returns whether this value is cached or not.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| t | [Type](../enums/_leaflet_.trackstats.cache.type.md) |  Type of data to search for. |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`t` | [Type](../enums/_leaflet_.trackstats.cache.type.md) | Type of data to search for. |
+`coords` | LatLng | Data  |
 
-**Returns:** `boolean`
+**Returns:** boolean
 
 ___
-<a id="hasslope"></a>
 
-###  hasSlope
+### hasSlope
 
-▸ **hasSlope**(coords: *`LatLng`*): `boolean`
+▸ **hasSlope**(`coords`: LatLng): boolean
 
 Shorthand for `has('slope', coords)`
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`coords` | LatLng | Data  |
 
-**Returns:** `boolean`
+**Returns:** boolean
 
 ___
-<a id="hasz"></a>
 
-###  hasZ
+### hasZ
 
-▸ **hasZ**(coords: *`LatLng`*): `boolean`
+▸ **hasZ**(`coords`: LatLng): boolean
 
 Shorthand for `has('z', coords)`
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| coords | `LatLng` |  Data |
+Name | Type | Description |
+------ | ------ | ------ |
+`coords` | LatLng | Data  |
 
-**Returns:** `boolean`
+**Returns:** boolean
 
 ___
-<a id="setprecision"></a>
 
-###  setPrecision
+### setPrecision
 
-▸ **setPrecision**(p: *`number`*): `void`
+▸ **setPrecision**(`p`: number): void
 
 Sets the precision.
 
 Values passed to `add` or `get` will be rounded to that precision.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| p | `number` |  Precision |
+Name | Type | Description |
+------ | ------ | ------ |
+`p` | number | Precision  |
 
-**Returns:** `void`
-
-___
-
+**Returns:** void

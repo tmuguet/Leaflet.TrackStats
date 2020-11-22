@@ -753,12 +753,12 @@ describe('Stats', () => {
         precision: 8,
         fetchAltitudes(array) {
           return new Promise((resolve) => {
-            resolve(array.map(x => ({ lat: x.lat, lng: x.lng, z: x.lat + 2 * x.lng })));
+            resolve(array.map((x) => ({ lat: x.lat, lng: x.lng, z: x.lat + 2 * x.lng })));
           });
         },
         fetchSlopes(array) {
           return new Promise((resolve) => {
-            resolve(array.map(x => ({ lat: x.lat, lng: x.lng, slope: x.lat + x.lng })));
+            resolve(array.map((x) => ({ lat: x.lat, lng: x.lng, slope: x.lat + x.lng })));
           });
         },
       };
@@ -806,12 +806,12 @@ describe('Stats', () => {
         precision: 8,
         fetchAltitudes(array) {
           return new Promise((resolve) => {
-            resolve(array.map(x => ({ lat: x.lat, lng: x.lng, z: x.lat + 2 * x.lng })));
+            resolve(array.map((x) => ({ lat: x.lat, lng: x.lng, z: x.lat + 2 * x.lng })));
           });
         },
         fetchSlopes(array) {
           return new Promise((resolve) => {
-            resolve(array.map(x => ({ lat: x.lat, lng: x.lng, slope: x.lat + x.lng })));
+            resolve(array.map((x) => ({ lat: x.lat, lng: x.lng, slope: x.lat + x.lng })));
           });
         },
       };
@@ -826,6 +826,7 @@ describe('Stats', () => {
       ];
       const statsSplice = [];
 
+      /* eslint-disable no-await-in-loop */
       const statsAcc = new L.TrackStats.Stats([]);
       for (let i = 0; i < latlngsSplice.length; i += 1) {
         const polyline = L.polyline(latlngsSplice[i]);
@@ -833,6 +834,7 @@ describe('Stats', () => {
         await polyline.fetchSlope(fetcher);
         statsSplice[i] = polyline.computeStats().accumulate(statsAcc);
       }
+      /* eslint-enable no-await-in-loop */
 
       const polyline = L.polyline(latlngs);
       await polyline.fetchAltitude(fetcher);
