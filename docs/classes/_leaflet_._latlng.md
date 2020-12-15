@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [_LatLng](../classes/_leaflet_._latlng.md)
+**[Leaflet.TrackDrawer](../README.md)**
 
-# Class: _LatLng
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / \_LatLng
+
+# Class: \_LatLng
 
 Extends Leaflet's LatLng
 
 ## Hierarchy
 
-**_LatLng**
+* **_LatLng**
 
 ## Index
 
@@ -14,17 +16,10 @@ Extends Leaflet's LatLng
 
 * [getCachedInfos](_leaflet_._latlng.md#getcachedinfos)
 
----
-
 ## Methods
 
-<a id="getcachedinfos"></a>
-
-###  getCachedInfos
+### getCachedInfos
 
 ▸ **getCachedInfos**(): [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
 
 **Returns:** [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
-
-___
-

@@ -47,15 +47,12 @@ module.exports = L.Class.extend({
       promises.push(this._queue.add(() => this._fetchBatchAltitude(g, eventTarget)));
     }
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const data = await Promise.all(promises);
+    return new Promise((resolve, reject) => {
+      Promise.all(promises).then((data) => {
         const results = [];
-        data.forEach(x => results.push(...x));
+        data.forEach((x) => results.push(...x));
         resolve(results);
-      } catch (e) {
-        reject(e);
-      }
+      }).catch((e) => reject(e));
     });
   },
 
@@ -127,15 +124,12 @@ module.exports = L.Class.extend({
       });
     });
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const data = await Promise.all(promises);
+    return new Promise((resolve, reject) => {
+      Promise.all(promises).then((data) => {
         const results = [];
-        data.forEach(x => results.push(...x));
+        data.forEach((x) => results.push(...x));
         resolve(results);
-      } catch (e) {
-        reject(e);
-      }
+      }).catch((e) => reject(e));
     });
   },
 

@@ -1,10 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [Stats](../classes/_leaflet_.trackstats.stats.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / Stats
 
 # Class: Stats
 
 ## Hierarchy
 
-**Stats**
+* **Stats**
 
 ## Index
 
@@ -26,152 +28,131 @@
 * [getSlopeTerrainMax](_leaflet_.trackstats.stats.md#getslopeterrainmax)
 * [getSlopeTerrainMin](_leaflet_.trackstats.stats.md#getslopeterrainmin)
 
----
-
 ## Constructors
 
-<a id="constructor"></a>
+### constructor
 
-###  constructor
+\+ **new Stats**(`latlngs`: [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)[], `options?`: [StatsOptions](../interfaces/_leaflet_.trackstats.statsoptions.md)): [Stats](_leaflet_.trackstats.stats.md)
 
-⊕ **new Stats**(latlngs: *[LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)[]*, options?: *[StatsOptions](../interfaces/_leaflet_.trackstats.statsoptions.md)*): [Stats](_leaflet_.trackstats.stats.md)
+#### Parameters:
 
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| latlngs | [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)[] |
-| `Optional` options | [StatsOptions](../interfaces/_leaflet_.trackstats.statsoptions.md) |
+Name | Type |
+------ | ------ |
+`latlngs` | [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)[] |
+`options?` | [StatsOptions](../interfaces/_leaflet_.trackstats.statsoptions.md) |
 
 **Returns:** [Stats](_leaflet_.trackstats.stats.md)
 
-___
-
 ## Methods
 
-<a id="accumulate"></a>
+### accumulate
 
-###  accumulate
-
-▸ **accumulate**(accumulator: *[Stats](_leaflet_.trackstats.stats.md)*): `this`
+▸ **accumulate**(`accumulator`: [Stats](_leaflet_.trackstats.stats.md)): this
 
 Adds stats of this instance into accumulator
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| accumulator | [Stats](_leaflet_.trackstats.stats.md) |   |
+Name | Type | Description |
+------ | ------ | ------ |
+`accumulator` | [Stats](_leaflet_.trackstats.stats.md) |   |
 
-**Returns:** `this`
+**Returns:** this
 
 ___
-<a id="getaltmax"></a>
 
-###  getAltMax
+### getAltMax
 
-▸ **getAltMax**(): `number`
+▸ **getAltMax**(): number
 
 Gets the maximum altitude on the path (in m)
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getaltmin"></a>
 
-###  getAltMin
+### getAltMin
 
-▸ **getAltMin**(): `number`
+▸ **getAltMin**(): number
 
 Gets the minimum latitude on the path (in m)
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getdistance"></a>
 
-###  getDistance
+### getDistance
 
-▸ **getDistance**(): `number`
+▸ **getDistance**(): number
 
 Gets the cumputed distance, in km
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getheightdiffdown"></a>
 
-###  getHeightDiffDown
+### getHeightDiffDown
 
-▸ **getHeightDiffDown**(): `number`
+▸ **getHeightDiffDown**(): number
 
 Gets the negative height difference (in m)
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getheightdiffup"></a>
 
-###  getHeightDiffUp
+### getHeightDiffUp
 
-▸ **getHeightDiffUp**(): `number`
+▸ **getHeightDiffUp**(): number
 
 Gets the positive height difference (in m)
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getlatlngs"></a>
 
-###  getLatLngs
+### getLatLngs
 
 ▸ **getLatLngs**(): [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)[]
 
 **Returns:** [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)[]
 
 ___
-<a id="getslopemax"></a>
 
-###  getSlopeMax
+### getSlopeMax
 
-▸ **getSlopeMax**(): `number`
+▸ **getSlopeMax**(): number
 
 Gets the maximum slope on the path (i.e. max ascent)
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getslopemin"></a>
 
-###  getSlopeMin
+### getSlopeMin
 
-▸ **getSlopeMin**(): `number`
+▸ **getSlopeMin**(): number
 
 Gets the minimum slope on the path (i.e. max descent)
 
-**Returns:** `number`
+**Returns:** number
 
 ___
-<a id="getslopeterrainmax"></a>
 
-###  getSlopeTerrainMax
+### getSlopeTerrainMax
 
-▸ **getSlopeTerrainMax**(): `number` \| `undefined`
+▸ **getSlopeTerrainMax**(): number \| undefined
 
 Gets the maximum slope on the terrain
 
-**Returns:** `number` \| `undefined`
+**Returns:** number \| undefined
 
 ___
-<a id="getslopeterrainmin"></a>
 
-###  getSlopeTerrainMin
+### getSlopeTerrainMin
 
-▸ **getSlopeTerrainMin**(): `number` \| `undefined`
+▸ **getSlopeTerrainMin**(): number \| undefined
 
 Gets the minimum slope on the terrain
 
-**Returns:** `number` \| `undefined`
-
-___
-
+**Returns:** number \| undefined

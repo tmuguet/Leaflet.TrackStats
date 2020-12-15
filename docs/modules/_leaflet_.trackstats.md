@@ -1,11 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md)
+**[Leaflet.TrackDrawer](../README.md)**
 
-# Module: TrackStats
+> [Globals](../README.md) / ["leaflet"](_leaflet_.md) / TrackStats
+
+# Namespace: TrackStats
 
 TrackStats
 
 Usage sample:
-
 ```javascript
 var trackstats = L.TrackStats.geoportail('<key>', map);
 var polyline = L.polyline([...]).addTo(map);
@@ -86,7 +87,7 @@ c.setPopupContent(
 
 ## Index
 
-### Modules
+### Namespaces
 
 * [cache](_leaflet_.trackstats.cache.md)
 
@@ -109,45 +110,37 @@ c.setPopupContent(
 
 ### Functions
 
-* [geoportail](_leaflet_.trackstats.md#geoportail-1)
-* [mapquest](_leaflet_.trackstats.md#mapquest-1)
-
----
+* [geoportail](_leaflet_.trackstats.md#geoportail)
+* [mapquest](_leaflet_.trackstats.md#mapquest)
 
 ## Functions
 
-<a id="geoportail-1"></a>
+### geoportail
 
-###  geoportail
+▸ **geoportail**(`apiKey`: String, `map`: Map, `options?`: [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md)): [Geoportail](../classes/_leaflet_.trackstats.geoportail.md)
 
-▸ **geoportail**(apiKey: *`String`*, map: *`Map`*, options?: *[GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md)*): [Geoportail](../classes/_leaflet_.trackstats.geoportail.md)
+#### Parameters:
 
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| apiKey | `String` |
-| map | `Map` |
-| `Optional` options | [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md) |
+Name | Type |
+------ | ------ |
+`apiKey` | String |
+`map` | Map |
+`options?` | [GeoportailOptions](../interfaces/_leaflet_.trackstats.geoportailoptions.md) |
 
 **Returns:** [Geoportail](../classes/_leaflet_.trackstats.geoportail.md)
 
 ___
-<a id="mapquest-1"></a>
 
-###  mapquest
+### mapquest
 
-▸ **mapquest**(apiKey: *`String`*, map: *`Map`*, options?: *[MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md)*): [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
+▸ **mapquest**(`apiKey`: String, `map`: Map, `options?`: [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md)): [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| apiKey | `String` |
-| map | `Map` |
-| `Optional` options | [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md) |
+Name | Type |
+------ | ------ |
+`apiKey` | String |
+`map` | Map |
+`options?` | [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md) |
 
 **Returns:** [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
-
-___
-

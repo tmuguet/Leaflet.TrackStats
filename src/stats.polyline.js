@@ -32,71 +32,65 @@ L.Polyline.include({
 
   fetchAltitude(fetcher, eventTarget) {
     if (!('altitudes' in fetcher.features) || !fetcher.features.altitudes) {
-      return new Promise((resolve, reject) => reject(new Error('Unsupported')));
+      return new Promise((_resolve, reject) => reject(new Error('Unsupported')));
     }
 
     cache.setPrecision(fetcher.precision);
-    const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasZ(coords));
+    const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter((coords) => !cache.hasZ(coords));
 
-    if (eventTarget && latlngs.length > 0) {
+    if (latlngs.length === 0) { return new Promise((resolve) => resolve()); }
+
+    if (eventTarget) {
       eventTarget.fire('TrackStats:fetching', {
         datatype: 'altitudes',
         size: latlngs.length,
       });
     }
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (latlngs.length > 0) {
-          const elevations = await fetcher.fetchAltitudes(latlngs, eventTarget);
-          elevations.forEach(x => cache.addZ(x));
+    return new Promise((resolve, reject) => {
+      fetcher.fetchAltitudes(latlngs, eventTarget).then((elevations) => {
+        elevations.forEach((x) => cache.addZ(x));
 
-          if (eventTarget) {
-            eventTarget.fire('TrackStats:done', {
-              datatype: 'altitudes',
-              size: elevations.length,
-            });
-          }
+        if (eventTarget) {
+          eventTarget.fire('TrackStats:done', {
+            datatype: 'altitudes',
+            size: elevations.length,
+          });
         }
         resolve();
-      } catch (e) {
-        reject(e);
-      }
+      }).catch((e) => reject(e));
     });
   },
 
   fetchSlope(fetcher, eventTarget) {
     if (!('slopes' in fetcher.features) || !fetcher.features.slopes) {
-      return new Promise((resolve, reject) => reject(new Error('Unsupported')));
+      return new Promise((_resolve, reject) => reject(new Error('Unsupported')));
     }
 
     cache.setPrecision(fetcher.precision);
-    const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter(coords => !cache.hasSlope(coords));
+    const latlngs = Array.from(new Set(getLatLngsFlatten(this))).filter((coords) => !cache.hasSlope(coords));
 
-    if (eventTarget && latlngs.length > 0) {
+    if (latlngs.length === 0) { return new Promise((resolve) => resolve()); }
+
+    if (eventTarget) {
       eventTarget.fire('TrackStats:fetching', {
         datatype: 'slopes',
         size: latlngs.length,
       });
     }
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (latlngs.length > 0) {
-          const slopes = await fetcher.fetchSlopes(latlngs, eventTarget);
-          slopes.forEach(x => cache.addSlope(x));
+    return new Promise((resolve, reject) => {
+      fetcher.fetchSlopes(latlngs, eventTarget).then((slopes) => {
+        slopes.forEach((x) => cache.addSlope(x));
 
-          if (eventTarget) {
-            eventTarget.fire('TrackStats:done', {
-              datatype: 'slopes',
-              size: slopes.length,
-            });
-          }
+        if (eventTarget) {
+          eventTarget.fire('TrackStats:done', {
+            datatype: 'slopes',
+            size: slopes.length,
+          });
         }
         resolve();
-      } catch (e) {
-        reject(e);
-      }
+      }).catch((e) => reject(e));
     });
   },
 
@@ -113,7 +107,7 @@ L.Polyline.include({
   },
 
   computeStats() {
-    const latlngs = getLatLngsFlatten(this).map(coords => coords.getCachedInfos());
+    const latlngs = getLatLngsFlatten(this).map((coords) => coords.getCachedInfos());
     this._stats = new Stats(latlngs);
     return this.getStats();
   },

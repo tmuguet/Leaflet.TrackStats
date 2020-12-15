@@ -1,6 +1,8 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md)
+**[Leaflet.TrackDrawer](../README.md)**
 
-# Module: TrackDrawer
+> [Globals](../README.md) / ["leaflet"](_leaflet_.md) / TrackDrawer
+
+# Namespace: TrackDrawer
 
 Extends TrackDrawer if available
 
@@ -13,6 +15,3 @@ Extends TrackDrawer if available
 ### Interfaces
 
 * [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)
-
----
-

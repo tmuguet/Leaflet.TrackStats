@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / LatLngLiteralExtended
 
 # Interface: LatLngLiteralExtended
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ LatLngLiteralExtended**
+  ↳ **LatLngLiteralExtended**
 
 ## Index
 
@@ -15,22 +17,14 @@
 * [slope](_leaflet_.trackstats.latlngliteralextended.md#slope)
 * [z](_leaflet_.trackstats.latlngliteralextended.md#z)
 
----
-
 ## Properties
 
-<a id="slope"></a>
+### slope
 
-### `<Optional>` slope
-
-**● slope**: *`number`*
-
-___
-<a id="z"></a>
-
-### `<Optional>` z
-
-**● z**: *`number`*
+• `Optional` **slope**: number
 
 ___
 
+### z
+
+• `Optional` **z**: number

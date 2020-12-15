@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / LatLngLiteralSlope
 
 # Interface: LatLngLiteralSlope
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ LatLngLiteralSlope**
+  ↳ **LatLngLiteralSlope**
 
 ## Index
 
@@ -14,15 +16,8 @@
 
 * [slope](_leaflet_.trackstats.latlngliteralslope.md#slope)
 
----
-
 ## Properties
 
-<a id="slope"></a>
+### slope
 
-### `<Optional>` slope
-
-**● slope**: *`number`*
-
-___
-
+• `Optional` **slope**: number

@@ -41,23 +41,20 @@ if (L.TrackDrawer !== undefined) {
         } while (currentNode.options.type !== 'stopover');
       });
 
-      return new Promise(async (resolve, reject) => {
-        try {
-          const promises = [];
-          routes.forEach((r) => {
-            promises.push(r.fetchInfos(fetcher, this).then(() => r.computeStats()));
-          });
+      return new Promise((resolve, reject) => {
+        const promises = [];
+        routes.forEach((r) => {
+          promises.push(r.fetchInfos(fetcher, this).then(() => r.computeStats()));
+        });
 
-          await Promise.all(promises);
+        Promise.all(promises).then(() => {
           this._i -= 1;
           if (this._i === 0) {
             // Compute stats only if this._i is back to 0 (otherwise the track is out-of-date)
             this._computeStats();
           }
           resolve();
-        } catch (ex) {
-          reject(ex);
-        }
+        }).catch((e) => reject(e));
       });
     },
 

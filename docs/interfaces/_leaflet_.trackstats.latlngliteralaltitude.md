@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / LatLngLiteralAltitude
 
 # Interface: LatLngLiteralAltitude
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ LatLngLiteralAltitude**
+  ↳ **LatLngLiteralAltitude**
 
 ## Index
 
@@ -14,15 +16,8 @@
 
 * [z](_leaflet_.trackstats.latlngliteralaltitude.md#z)
 
----
-
 ## Properties
 
-<a id="z"></a>
+### z
 
-### `<Optional>` z
-
-**● z**: *`number`*
-
-___
-
+• `Optional` **z**: number

@@ -1,14 +1,16 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackStats](../modules/_leaflet_.trackstats.md) > [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / IFetcher
 
 # Interface: IFetcher
 
-*__fires__*: TrackStats:fetched Fired when some data has been fetched
+**`fires`** TrackStats:fetched Fired when some data has been fetched
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ IFetcher**
+  ↳ **IFetcher**
 
 ## Implemented by
 
@@ -22,40 +24,32 @@
 * [fetchAltitudes](_leaflet_.trackstats.ifetcher.md#fetchaltitudes)
 * [fetchSlopes](_leaflet_.trackstats.ifetcher.md#fetchslopes)
 
----
-
 ## Methods
 
-<a id="fetchaltitudes"></a>
+### fetchAltitudes
 
-###  fetchAltitudes
+▸ **fetchAltitudes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]>
 
-▸ **fetchAltitudes**(latlngs: *`LatLng`[]*, eventTarget?: *`Evented`*): `Promise`<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]>
+#### Parameters:
 
-**Parameters:**
+Name | Type |
+------ | ------ |
+`latlngs` | LatLng[] |
+`eventTarget?` | Evented |
 
-| Name | Type |
-| ------ | ------ |
-| latlngs | `LatLng`[] |
-| `Optional` eventTarget | `Evented` |
-
-**Returns:** `Promise`<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]>
-
-___
-<a id="fetchslopes"></a>
-
-###  fetchSlopes
-
-▸ **fetchSlopes**(latlngs: *`LatLng`[]*, eventTarget?: *`Evented`*): `Promise`<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]>
-
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| latlngs | `LatLng`[] |
-| `Optional` eventTarget | `Evented` |
-
-**Returns:** `Promise`<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]>
+**Returns:** Promise\<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]>
 
 ___
 
+### fetchSlopes
+
+▸ **fetchSlopes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]>
+
+#### Parameters:
+
+Name | Type |
+------ | ------ |
+`latlngs` | LatLng[] |
+`eventTarget?` | Evented |
+
+**Returns:** Promise\<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]>
