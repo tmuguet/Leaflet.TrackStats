@@ -6,7 +6,9 @@ import pkg from './package.json';
 
 const input = 'src/index.js';
 const external = ['leaflet', '@mapbox/corslite', 'geoportal-access-lib', 'promise-queue'];
-const globals = { leaflet: 'L', '@mapbox/corslite': 'corslite', 'geoportal-access-lib': 'Gp', 'promise-queue': 'Queue' };
+const globals = {
+  leaflet: 'L', '@mapbox/corslite': 'corslite', 'geoportal-access-lib': 'Gp', 'promise-queue': 'Queue',
+};
 const sourcemap = true;
 
 export default [
@@ -25,7 +27,7 @@ export default [
       commonjs(),
       babel({
         exclude: ['node_modules/**'],
-        babelHelpers: 'bundled',
+        babelHelpers: 'runtime',
       }),
       terser(),
     ],
@@ -45,7 +47,7 @@ export default [
       commonjs(),
       babel({
         exclude: ['node_modules/**'],
-        babelHelpers: 'bundled'
+        babelHelpers: 'runtime',
       }),
     ],
     external,
@@ -54,7 +56,7 @@ export default [
   // CommonJS (for Node) and ES module (for bundlers) build.
   {
     input,
-    external: ['ms'] + external,
+    external: ['ms', /@babel\/runtime/] + external,
     output: [
       {
         file: pkg.main, format: 'cjs', sourcemap, globals,

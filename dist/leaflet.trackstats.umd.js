@@ -486,38 +486,52 @@
     L__default['default'].TrackDrawer.Track.addInitHook('_bindEvent');
   }
 
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) {
+      arr2[i] = arr[i];
+    }
+
+    return arr2;
   }
 
+  var arrayLikeToArray = _arrayLikeToArray;
+
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+    if (Array.isArray(arr)) return arrayLikeToArray(arr);
   }
+
+  var arrayWithoutHoles = _arrayWithoutHoles;
 
   function _iterableToArray(iter) {
     if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
   }
 
+  var iterableToArray = _iterableToArray;
+
   function _unsupportedIterableToArray(o, minLen) {
     if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    if (typeof o === "string") return arrayLikeToArray(o, minLen);
     var n = Object.prototype.toString.call(o).slice(8, -1);
     if (n === "Object" && o.constructor) n = o.constructor.name;
     if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
   }
 
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-    return arr2;
-  }
+  var unsupportedIterableToArray = _unsupportedIterableToArray;
 
   function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
+
+  var nonIterableSpread = _nonIterableSpread;
+
+  function _toConsumableArray(arr) {
+    return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+  }
+
+  var toConsumableArray = _toConsumableArray;
 
   function latLngToTilePixel(latlng, crs, zoom, tileSize, pixelOrigin) {
     var layerPoint = crs.latLngToPoint(latlng, zoom).floor();
@@ -577,7 +591,7 @@
         Promise.all(promises).then(function (data) {
           var results = [];
           data.forEach(function (x) {
-            return results.push.apply(results, _toConsumableArray(x));
+            return results.push.apply(results, toConsumableArray(x));
           });
           resolve(results);
         })["catch"](function (e) {
@@ -663,7 +677,7 @@
         Promise.all(promises).then(function (data) {
           var results = [];
           data.forEach(function (x) {
-            return results.push.apply(results, _toConsumableArray(x));
+            return results.push.apply(results, toConsumableArray(x));
           });
           resolve(results);
         })["catch"](function (e) {
@@ -785,7 +799,7 @@
         Promise.all(promises).then(function (data) {
           var results = [];
           data.forEach(function (x) {
-            return results.push.apply(results, _toConsumableArray(x));
+            return results.push.apply(results, toConsumableArray(x));
           });
           resolve(results);
         })["catch"](function (e) {
