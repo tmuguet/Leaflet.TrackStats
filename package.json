@@ -68,6 +68,7 @@
     "promise-queue": "^2.2.5"
   },
   "optionalDependencies": {
-    "geoportal-access-lib": "^2.1.6"
+    "geoportal-access-lib": "^2.1.6",
+    "leaflet-trackdrawer": "^0.6.0"
   }
 }
