@@ -43,7 +43,7 @@ Name | Type |
 
 ### fetchAltitudes
 
-▸ **fetchAltitudes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]>
+▸ **fetchAltitudes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]\>
 
 *Implementation of [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md)*
 
@@ -54,13 +54,13 @@ Name | Type |
 `latlngs` | LatLng[] |
 `eventTarget?` | Evented |
 
-**Returns:** Promise\<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]>
+**Returns:** Promise<[LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)[]\>
 
 ___
 
 ### fetchSlopes
 
-▸ **fetchSlopes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>
+▸ **fetchSlopes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]\>
 
 *Implementation of [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md)*
 
@@ -71,4 +71,4 @@ Name | Type |
 `latlngs` | LatLng[] |
 `eventTarget?` | Evented |
 
-**Returns:** Promise\<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]>
+**Returns:** Promise<[LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)[]\>

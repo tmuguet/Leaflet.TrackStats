@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trackstats",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Computes altitude/slope statistics on Leaflet polylines",
   "main": "dist/leaflet.trackstats.cjs.js",
   "module": "dist/leaflet.trackstats.esm.js",

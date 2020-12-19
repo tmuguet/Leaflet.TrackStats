@@ -36,7 +36,7 @@ ___
 
 ### fetchAltitude
 
-▸ **fetchAltitude**(`fetcher`: [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md), `eventTarget?`: Evented): Promise\<void>
+▸ **fetchAltitude**(`fetcher`: [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md), `eventTarget?`: Evented): Promise<void\>
 
 **`fires`** TrackStats:fetching Fired when fetching data has started - sends EventPayload with `datatype=altitudes`
 
@@ -49,13 +49,13 @@ Name | Type | Description |
 `fetcher` | [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md) |  |
 `eventTarget?` | Evented | Object to notify events to |
 
-**Returns:** Promise\<void>
+**Returns:** Promise<void\>
 
 ___
 
 ### fetchInfos
 
-▸ **fetchInfos**(`fetcher`: [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md), `eventTarget?`: Evented): Promise\<void>
+▸ **fetchInfos**(`fetcher`: [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md), `eventTarget?`: Evented): Promise<void\>
 
 Shorthand for `fetchAltitude` and `fetchSlope`.
 
@@ -66,13 +66,13 @@ Name | Type | Description |
 `fetcher` | [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md) |  |
 `eventTarget?` | Evented | Object to notify events to  |
 
-**Returns:** Promise\<void>
+**Returns:** Promise<void\>
 
 ___
 
 ### fetchSlope
 
-▸ **fetchSlope**(`fetcher`: [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md), `eventTarget?`: Evented): Promise\<void>
+▸ **fetchSlope**(`fetcher`: [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md), `eventTarget?`: Evented): Promise<void\>
 
 **`fires`** TrackStats:fetching Fired when fetching data has started - sends EventPayload with `datatype=slopes`
 
@@ -85,7 +85,7 @@ Name | Type | Description |
 `fetcher` | [IFetcher](../interfaces/_leaflet_.trackstats.ifetcher.md) |  |
 `eventTarget?` | Evented | Object to notify events to |
 
-**Returns:** Promise\<void>
+**Returns:** Promise<void\>
 
 ___
 

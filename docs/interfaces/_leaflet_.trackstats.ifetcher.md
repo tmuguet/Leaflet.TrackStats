@@ -28,7 +28,7 @@
 
 ### fetchAltitudes
 
-▸ **fetchAltitudes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]>
+▸ **fetchAltitudes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]\>
 
 #### Parameters:
 
@@ -37,13 +37,13 @@ Name | Type |
 `latlngs` | LatLng[] |
 `eventTarget?` | Evented |
 
-**Returns:** Promise\<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]>
+**Returns:** Promise<[LatLngLiteralAltitude](_leaflet_.trackstats.latlngliteralaltitude.md)[]\>
 
 ___
 
 ### fetchSlopes
 
-▸ **fetchSlopes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise\<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]>
+▸ **fetchSlopes**(`latlngs`: LatLng[], `eventTarget?`: Evented): Promise<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]\>
 
 #### Parameters:
 
@@ -52,4 +52,4 @@ Name | Type |
 `latlngs` | LatLng[] |
 `eventTarget?` | Evented |
 
-**Returns:** Promise\<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]>
+**Returns:** Promise<[LatLngLiteralSlope](_leaflet_.trackstats.latlngliteralslope.md)[]\>
