@@ -4,7 +4,7 @@ Leaflet TrackStats is a plugin for [Leaflet](http://leafletjs.com/) to compute a
 
 `L.TrackStats` extends Leaflet's Polyline objects to include methods to compute the stats. It also integrates nicely with [Leaflet TrackDrawer](https://github.com/tmuguet/Leaflet.TrackDrawer).
 
-This plugin only supports MapQuest and GeoPortail as data providers (you will need your own API keys by the way), but it can easily be extended for new data providers by implementing the `IFetcher` interface.
+This plugin supports [GeoPortail](https://geoservices.ign.fr/documentation/services/api-et-services-ogc/calcul-altimetrique-rest), [Open-Elevation](https://www.open-elevation.com/) and [Open Topo Data](https://www.opentopodata.org/) as data providers, but it can easily be extended for new data providers by implementing the `IFetcher` interface.
 
 ## Demo
 
