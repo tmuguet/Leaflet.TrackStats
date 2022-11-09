@@ -6,5 +6,8 @@
     "max-len": ["error", { "code": 120 }],
     "import/no-unresolved": "off",
     "import/no-extraneous-dependencies": "off"
+  },
+  "globals": {
+    "window": "readonly"
   }
 }

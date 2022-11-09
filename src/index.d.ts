@@ -230,9 +230,12 @@ track.on('TrackDrawer:statsdone', () => {
     }
     function geoportail(apiKey: String, map: Map, options?: GeoportailOptions): Geoportail;
 
-    interface MapquestOptions {}
-    class Mapquest implements IFetcher {
-      constructor(apiKey: String, map: Map, options?: MapquestOptions);
+    interface OpenElevationOptions {
+      server: string,
+      queueConcurrency: number,
+    }
+    class OpenElevation implements IFetcher {
+      constructor(map: Map, options?: OpenElevationOptions);
 
       fetchAltitudes(latlngs: LatLng[], eventTarget?: Evented): Promise<LatLngLiteralAltitude[]>;
 
@@ -244,7 +247,25 @@ track.on('TrackDrawer:statsdone', () => {
        */
       fetchSlopes(latlngs: LatLng[], eventTarget?: Evented): Promise<LatLngLiteralSlope[]>;
     }
-    function mapquest(apiKey: String, map: Map, options?: MapquestOptions): Mapquest;
+    function openElevation(map: Map, options?: OpenElevationOptions): OpenElevation;
+
+    interface OpenTopoDataOptions {
+      queueConcurrency: number,
+    }
+    class OpenTopoData implements IFetcher {
+      constructor(server: string, map: Map, options?: OpenTopoDataOptions);
+
+      fetchAltitudes(latlngs: LatLng[], eventTarget?: Evented): Promise<LatLngLiteralAltitude[]>;
+
+      /**
+       * Unsupported
+       * @param latlngs
+       * @param eventTarget
+       * @throws Error
+       */
+      fetchSlopes(latlngs: LatLng[], eventTarget?: Evented): Promise<LatLngLiteralSlope[]>;
+    }
+    function openTopoData(server: string, map: Map, options?: OpenTopoDataOptions): OpenTopoData;
   }
 
   /**

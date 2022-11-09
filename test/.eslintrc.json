@@ -16,6 +16,7 @@
     "L": "readonly",
     "expect": "readonly",
     "sinon": "readonly",
-    "happen": "readonly"
+    "happen": "readonly",
+    "window": "readonly"
   }
 }
