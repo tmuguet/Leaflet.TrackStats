@@ -15,7 +15,8 @@
 ## Implemented by
 
 * [Geoportail](../classes/_leaflet_.trackstats.geoportail.md)
-* [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
+* [OpenElevation](../classes/_leaflet_.trackstats.openelevation.md)
+* [OpenTopoData](../classes/_leaflet_.trackstats.opentopodata.md)
 
 ## Index
 

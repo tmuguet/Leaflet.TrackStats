@@ -4,19 +4,24 @@ require('./stats.trackdrawer');
 const Stats = require('./stats');
 const cache = require('./cache');
 const Geoportail = require('./geoportail');
-const Mapquest = require('./mapquest');
+const OpenElevation = require('./openelevation');
+const OpenTopoData = require('./opentopodata');
 
 L.TrackStats = {
   cache,
   Geoportail,
-  Mapquest,
+  OpenElevation,
+  OpenTopoData,
   Stats,
 
   geoportail(apiKey, map, options) {
     return new Geoportail(apiKey, map, options);
   },
-  mapquest(apiKey, map, options) {
-    return new Mapquest(apiKey, map, options);
+  openElevation(map, options) {
+    return new OpenElevation(map, options);
+  },
+  openTopoData(server, map, options) {
+    return new OpenTopoData(server, map, options);
   },
 };
 

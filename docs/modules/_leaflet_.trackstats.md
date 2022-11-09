@@ -94,7 +94,8 @@ c.setPopupContent(
 ### Classes
 
 * [Geoportail](../classes/_leaflet_.trackstats.geoportail.md)
-* [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
+* [OpenElevation](../classes/_leaflet_.trackstats.openelevation.md)
+* [OpenTopoData](../classes/_leaflet_.trackstats.opentopodata.md)
 * [Stats](../classes/_leaflet_.trackstats.stats.md)
 
 ### Interfaces
@@ -105,13 +106,15 @@ c.setPopupContent(
 * [LatLngLiteralAltitude](../interfaces/_leaflet_.trackstats.latlngliteralaltitude.md)
 * [LatLngLiteralExtended](../interfaces/_leaflet_.trackstats.latlngliteralextended.md)
 * [LatLngLiteralSlope](../interfaces/_leaflet_.trackstats.latlngliteralslope.md)
-* [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md)
+* [OpenElevationOptions](../interfaces/_leaflet_.trackstats.openelevationoptions.md)
+* [OpenTopoDataOptions](../interfaces/_leaflet_.trackstats.opentopodataoptions.md)
 * [StatsOptions](../interfaces/_leaflet_.trackstats.statsoptions.md)
 
 ### Functions
 
 * [geoportail](_leaflet_.trackstats.md#geoportail)
-* [mapquest](_leaflet_.trackstats.md#mapquest)
+* [openElevation](_leaflet_.trackstats.md#openelevation)
+* [openTopoData](_leaflet_.trackstats.md#opentopodata)
 
 ## Functions
 
@@ -131,16 +134,31 @@ Name | Type |
 
 ___
 
-### mapquest
+### openElevation
 
-▸ **mapquest**(`apiKey`: String, `map`: Map, `options?`: [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md)): [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
+▸ **openElevation**(`map`: Map, `options?`: [OpenElevationOptions](../interfaces/_leaflet_.trackstats.openelevationoptions.md)): [OpenElevation](../classes/_leaflet_.trackstats.openelevation.md)
 
 #### Parameters:
 
 Name | Type |
 ------ | ------ |
-`apiKey` | String |
 `map` | Map |
-`options?` | [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md) |
+`options?` | [OpenElevationOptions](../interfaces/_leaflet_.trackstats.openelevationoptions.md) |
 
-**Returns:** [Mapquest](../classes/_leaflet_.trackstats.mapquest.md)
+**Returns:** [OpenElevation](../classes/_leaflet_.trackstats.openelevation.md)
+
+___
+
+### openTopoData
+
+▸ **openTopoData**(`server`: string, `map`: Map, `options?`: [OpenTopoDataOptions](../interfaces/_leaflet_.trackstats.opentopodataoptions.md)): [OpenTopoData](../classes/_leaflet_.trackstats.opentopodata.md)
+
+#### Parameters:
+
+Name | Type |
+------ | ------ |
+`server` | string |
+`map` | Map |
+`options?` | [OpenTopoDataOptions](../interfaces/_leaflet_.trackstats.opentopodataoptions.md) |
+
+**Returns:** [OpenTopoData](../classes/_leaflet_.trackstats.opentopodata.md)

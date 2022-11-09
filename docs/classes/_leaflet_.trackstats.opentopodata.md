@@ -1,12 +1,12 @@
 **[Leaflet.TrackDrawer](../README.md)**
 
-> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / Mapquest
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackStats](../modules/_leaflet_.trackstats.md) / OpenTopoData
 
-# Class: Mapquest
+# Class: OpenTopoData
 
 ## Hierarchy
 
-* **Mapquest**
+* **OpenTopoData**
 
 ## Implements
 
@@ -16,28 +16,28 @@
 
 ### Constructors
 
-* [constructor](_leaflet_.trackstats.mapquest.md#constructor)
+* [constructor](_leaflet_.trackstats.opentopodata.md#constructor)
 
 ### Methods
 
-* [fetchAltitudes](_leaflet_.trackstats.mapquest.md#fetchaltitudes)
-* [fetchSlopes](_leaflet_.trackstats.mapquest.md#fetchslopes)
+* [fetchAltitudes](_leaflet_.trackstats.opentopodata.md#fetchaltitudes)
+* [fetchSlopes](_leaflet_.trackstats.opentopodata.md#fetchslopes)
 
 ## Constructors
 
 ### constructor
 
-\+ **new Mapquest**(`apiKey`: String, `map`: Map, `options?`: [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md)): [Mapquest](_leaflet_.trackstats.mapquest.md)
+\+ **new OpenTopoData**(`server`: string, `map`: Map, `options?`: [OpenTopoDataOptions](../interfaces/_leaflet_.trackstats.opentopodataoptions.md)): [OpenTopoData](_leaflet_.trackstats.opentopodata.md)
 
 #### Parameters:
 
 Name | Type |
 ------ | ------ |
-`apiKey` | String |
+`server` | string |
 `map` | Map |
-`options?` | [MapquestOptions](../interfaces/_leaflet_.trackstats.mapquestoptions.md) |
+`options?` | [OpenTopoDataOptions](../interfaces/_leaflet_.trackstats.opentopodataoptions.md) |
 
-**Returns:** [Mapquest](_leaflet_.trackstats.mapquest.md)
+**Returns:** [OpenTopoData](_leaflet_.trackstats.opentopodata.md)
 
 ## Methods
 
